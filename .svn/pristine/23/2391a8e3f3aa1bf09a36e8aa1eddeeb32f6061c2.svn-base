@@ -1,0 +1,161 @@
+<template>
+    <div
+        id="echart"
+        ref='echart'
+    ></div>
+</template>
+<script>
+import * as echarts from "echarts";
+export default {
+    data() {
+        return {
+            myCharts: null,
+        };
+    },
+    props: {
+        visiable: {
+            type: Boolean,
+            default: false,
+        },
+        AvgData: {
+            type: Array,
+        },
+        Station_NameData: {
+            type: Array,
+        },
+        startDateStrHHmmss: {
+            type: String,
+        },
+        endDateStrHHmmss: {
+            type: String,
+        },
+        name: {
+            type: String,
+        },
+        Datetime: {
+            type: Array,
+        },
+    },
+    watch: {
+        visiable() {
+            this.$refs.echart.style.width = "100%";
+            this.myCharts.resize();
+        },
+    },
+    mounted() {
+        console.log(this.AvgData);
+        console.log(this.Datetime);
+        this.histogram();
+    },
+    methods: {
+        histogram() {
+            let timestart =
+                this.startDateStrHHmmss.substring(0, 4) +
+                "-" +
+                this.startDateStrHHmmss.substring(4, 6) +
+                "-" +
+                this.startDateStrHHmmss.substring(6, 8);
+            let timeend =
+                this.endDateStrHHmmss.substring(0, 4) +
+                "-" +
+                this.endDateStrHHmmss.substring(4, 6) +
+                "-" +
+                this.endDateStrHHmmss.substring(6, 8);
+            var newArr = [...new Set(this.Datetime)];
+            console.log(newArr.sort());
+            const option = {
+                tooltip: {
+                    trigger: "axis",
+                    axisPointer: {
+                        type: "shadow",
+                    },
+                },
+                title: {
+                    text: timestart + "-" + timeend + `${this.name}分布图`,
+                    left: "center",
+                },
+                grid: {
+                    show: true,
+                    top: "15%",
+                },
+                dataZoom: [
+                    {
+                        type: "inside",
+                    },
+                ],
+                xAxis: {
+                    type: "category",
+                    data: newArr.sort(),
+                    /*  axisLabel: {
+                        formatter: function (value) {
+                            var str =
+                                value.substr(4, 2) +
+                                "-" +
+                                value.substr(6, 2) +
+                                "\n" +
+                                value.substr(8, 2) +
+                                ":" +
+                                value.substr(10, 2);
+                            return str;
+                        },
+                    }, */
+                },
+                yAxis: {
+                    type: "value",
+                },
+                series: [
+                    {
+                        name: "临沧",
+                        type: "bar",
+                        data: this.AvgData.lingcang,
+                    },
+                    {
+                        name: "双江",
+                        type: "bar",
+                        data: this.AvgData.shuangjiang,
+                    },
+                    {
+                        name: "耿马",
+                        type: "bar",
+                        data: this.AvgData.gengma,
+                    },
+                    {
+                        name: "沧源",
+                        type: "bar",
+                        data: this.AvgData.cangyuan,
+                    },
+                    {
+                        name: "云县",
+                        type: "bar",
+                        data: this.AvgData.yunxian,
+                    },
+                    {
+                        name: "永德",
+                        type: "bar",
+                        data: this.AvgData.yongde,
+                    },
+                    {
+                        name: "凤庆",
+                        type: "bar",
+                        data: this.AvgData.fengqing,
+                    },
+                    {
+                        name: "镇康",
+                        type: "bar",
+                        data: this.AvgData.zhenkang,
+                    },
+                ],
+            };
+            this.myCharts = echarts.init(document.getElementById("echart"));
+            this.myCharts.setOption(option);
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+#echart {
+    margin: 50px 20px;
+    height: 90vh;
+    width: 60vw;
+}
+</style>

@@ -1,0 +1,172 @@
+<template>
+    <div style="overflow: auto;">
+        <div class="top">参数设置</div>
+        <div class="middle">
+            <table>
+                <tbody>
+                    <tr>
+                        <td :colspan="2">
+                            <el-row>
+                                <el-radio-group
+                                    v-model="type"
+                                    @change="changetype"
+                                >
+                                    <el-radio
+                                        :label="1"
+                                        v-if="disabled"
+                                        disabled
+                                    >多要素</el-radio>
+                                    <el-radio
+                                        :label="1"
+                                        v-else
+                                    >多要素</el-radio>
+                                    <el-radio :label="2">单要素</el-radio>
+                                </el-radio-group>
+                            </el-row>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="bottom">
+            <el-tree
+                class="treeDiv"
+                v-if="type == 1"
+                :data="treeData"
+                node-key="id"
+                show-checkbox
+                ref="tree"
+                default-expand-all
+                check-on-click-node
+                :props="defaultProps"
+                :default-checked-keys="defaultTree"
+                @check="deptNodeClick1"
+            >
+            </el-tree>
+            <el-tree
+                :class="type == 1?'treeDiv':'treeDiv singleTree'"
+                v-else
+                :data="treeData"
+                :check-strictly="true"
+                show-checkbox
+                ref="tree"
+                node-key="id"
+                :props="defaultProps"
+                check-on-click-node
+                @check="deptNodeClick2"
+            >
+            </el-tree>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            type: 1,
+            defaultTree: [0] /* 默认选中的 */,
+            defaultProps: {
+                children: "children",
+                label: "label",
+            },
+        };
+    },
+    props: {
+        treeData: {
+            type: Array,
+        },
+        arr: {
+            type: Array,
+        },
+        typevalue: {
+            type: Number,
+            default: 1,
+        },
+        disabled: {
+            type: Boolean,
+            default: false,
+        },
+    },
+    watch: {
+        typevalue(val) {
+            this.type = val;
+        },
+        arr(val) {
+            if (val) {
+                setTimeout(() => {
+                    this.defaultTree = [0];
+                    this.changetype();
+                    /*  this.defaultTree1.push(val[0].children[0].id); */
+                }, 10);
+            }
+        },
+    },
+    mounted() {
+        /*  this.changetype(); */
+    },
+    methods: {
+        deptNodeClick1(data) {
+            let currentNode = this.$refs.tree.getNode(data);
+            this.$emit("setCheckedKeys", currentNode.data.value);
+        },
+        deptNodeClick2(data) {
+            this.$refs.tree.setCheckedNodes([
+                {
+                    id: data.id,
+                    label: data.name,
+                },
+            ]);
+            let currentNode = this.$refs.tree.getNode(data);
+            console.log(currentNode)
+            this.$emit("setCheckedKeys", currentNode.data.value,currentNode.data.label,currentNode.data.imagehour,currentNode.data.imageelement);
+        },
+        changetype() {
+            if (this.type == 1) {
+                this.defaultTree = [0];
+                let elements = [];
+                this.$refs.tree.getCheckedNodes()[0].children.map((item) => {
+                    item.children.map((it) => {
+                        elements.push(it.value);
+                    });
+                });
+                this.$emit("setCheckedKeys", elements.toString());
+            } else {
+                this.$refs.tree.setCheckedNodes([
+                    {
+                        id: this.arr[0].children[0].id,
+                        label: this.arr[0].children[0].label,
+                    },
+                ]);
+                console.log(this.arr[0].children[0])
+                this.$emit("setCheckedKeys",this.arr[0].children[0].value,this.arr[0].children[0].label,this.arr[0].children[0].imagehour,this.arr[0].children[0].imageelement);
+            }
+            this.$emit("typecheck", this.type);
+        },
+    },
+};
+</script>
+
+<style lang="scss" scoped>
+@import "../../assets/css/dataQuery.scss";
+table tbody tr:last-child td:first-child {
+    border-right: 0;
+    text-align: center;
+}
+.el-radio-group {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+/deep/
+    .singleTree.el-tree
+    .el-tree-node
+    .is-leaf
+    + .el-checkbox
+    .el-checkbox__inner {
+    display: inline-block;
+}
+/deep/ .singleTree.el-tree .el-tree-node .el-checkbox .el-checkbox__inner {
+    display: none;
+}
+</style>

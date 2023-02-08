@@ -1,0 +1,347 @@
+<template>
+    <div style="height:100%">
+        <div
+            id="Map"
+            ref="Map"
+        >
+            <div id="mapTitle">{{timestart}}-{{timeend}}{{treeData.son}}分布图</div>
+            <span class="shentu">审图号：GS(2018)1709</span>
+            <div id="legend">
+                <p class="legendTitle">图例</p>
+                <ul>
+                    <li
+                        v-for="(item,index) in colorScale"
+                        :key="index"
+                    ><span
+                            class="legendColor"
+                            :style="`background:rgb(${item.r},${item.g},${item.b})`"
+                        ></span><span class="legendValue">{{item.value}}</span></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</template>
+<script>
+import "leaflet/dist/leaflet.css";
+import * as L from "leaflet";
+export default {
+    data() {
+        return {
+            bounds: [
+                [25.03284, 100.546904],
+                [23.073182, 98.668863],
+            ],
+            zoom: 9,
+            center: [24.03284, 99.75],
+            past: "http://172.24.97.251:8082/siteImg/",
+            timestart: "",
+            timeend: "",
+            geojson: null,
+            map: null,
+            regionList: [
+                // 各区县乡镇数据
+                {
+                    code: 530902,
+                    name: "临翔区",
+                    center: [23.88057205250008, 100.14319188500008],
+                    children: [
+                        "凤翔街道",
+                        "忙畔街道",
+                        "博尚镇",
+                        "南美乡",
+                        "蚂蚁堆乡",
+                        "章驮乡",
+                        "圈内乡",
+                        "马台乡",
+                        "邦东乡",
+                        "平村乡",
+                    ],
+                },
+                {
+                    code: 530921,
+                    name: "凤庆县",
+                    center: [24.63168504000005, 99.8701686350001],
+                    children: [
+                        "大寺乡",
+                        "凤山镇",
+                        "郭大寨乡",
+                        "鲁史镇",
+                        "洛党镇",
+                        "勐佑镇",
+                        "三岔河镇",
+                        "诗礼乡",
+                        "小湾镇",
+                        "新华乡",
+                        "雪山镇",
+                        "腰街乡",
+                        "营盘镇",
+                    ],
+                },
+                {
+                    code: 530922,
+                    name: "云县",
+                    center: [24.3569714725001, 100.13200314000011],
+                    children: [
+                        "爱华镇",
+                        "茶房乡",
+                        "大朝山西镇",
+                        "大寨镇",
+                        "后箐乡",
+                        "栗树乡",
+                        "漫湾镇",
+                        "忙怀乡",
+                        "茂兰镇",
+                        "晓街乡",
+                        "幸福镇",
+                        "涌宝镇",
+                    ],
+                },
+                {
+                    code: 530923,
+                    name: "永德县",
+                    center: [24.100577435000105, 99.46449338750006],
+                    children: [
+                        "班卡乡",
+                        "崇岗乡",
+                        "大山乡",
+                        "大雪山乡",
+                        "德党镇",
+                        "勐板乡",
+                        "乌木龙乡",
+                        "小勐统镇",
+                        "亚练乡",
+                        "永康镇",
+                    ],
+                },
+                {
+                    code: 530924,
+                    name: "镇康县",
+                    center: [23.939605952500074, 99.02511645750005],
+                    children: [
+                        "凤尾镇",
+                        "军赛乡",
+                        "忙丙乡",
+                        "勐堆乡",
+                        "勐捧镇",
+                        "木场乡",
+                        "南伞镇",
+                    ],
+                },
+                {
+                    code: 530925,
+                    name: "双江县",
+                    center: [23.503043215000083, 99.87243013000007],
+                    children: [
+                        "邦丙乡",
+                        "大文乡",
+                        "忙糯乡",
+                        "勐库镇",
+                        "勐勐镇",
+                        "沙河乡",
+                    ],
+                },
+                {
+                    code: 530926,
+                    name: "耿马县",
+                    center: [23.609570900000113, 99.35370818750005],
+                    children: [
+                        "大兴乡",
+                        "耿马镇",
+                        "贺派乡",
+                        "芒洪乡",
+                        "勐简乡",
+                        "勐撒镇",
+                        "勐永镇",
+                        "孟定镇",
+                        "四排山乡",
+                    ],
+                },
+                {
+                    code: 530927,
+                    name: "沧源县",
+                    center: [23.294409917500104, 99.29589947750009],
+                    children: [
+                        "班洪乡",
+                        "班老乡",
+                        "单甲乡",
+                        "芒卡镇",
+                        "勐董镇",
+                        "勐角乡",
+                        "勐来乡",
+                        "勐省镇",
+                        "糯良乡",
+                        "岩帅镇",
+                    ],
+                },
+            ],
+            imageBounds: null,
+        };
+    },
+    props: {
+        url: {
+            type: String,
+        },
+        visiable: {
+            type: Boolean,
+            default: false,
+        },
+        startDateStrHHmmss: {
+            type: String,
+            default: "",
+        },
+        endDateStrHHmmss: {
+            type: String,
+            default: "",
+        },
+        colorScale: {
+            type: Array,
+        },
+        treeData: {
+            type: Object,
+        },
+    },
+    mounted() {
+        this.timestart =
+            this.startDateStrHHmmss.substring(0, 4) +
+            "," +
+            this.startDateStrHHmmss.substring(4, 6) +
+            "," +
+            this.startDateStrHHmmss.substring(6, 8);
+        this.timeend =
+            this.endDateStrHHmmss.substring(0, 4) +
+            "," +
+            this.endDateStrHHmmss.substring(4, 6) +
+            "," +
+            this.endDateStrHHmmss.substring(6, 8);
+        this.initMap();
+    },
+    watch: {
+        visiable() {
+            this.$refs.map.mapObject.invalidateSize(true);
+        },
+        url() {
+            var imageUrl = "http://172.24.97.251:8082/siteImg/" + this.url;
+            L.imageOverlay(imageUrl, this.imageBounds).addTo(this.map);
+        },
+    },
+    methods: {
+        initMap() {
+            // 初始化网格预报 预报间隔的数据时间
+            this.map = L.map(this.$refs["Map"], {
+                center: [25.03284, 100.546904], // 地图中心
+                zoom: 8, //缩放比列
+                zoomControl: false, //禁用 + - 按钮
+                doubleClickZoom: false, // 禁用双击放大
+                attributionControl: false, // 移除右下角leaflet标识
+                zoomSnap: 0.01,
+            });
+            this.map.fitBounds([
+                [25.03284, 100.546904],
+                [23.073182, 98.668863],
+            ]);
+            this.imageBounds = [
+                [25.035, 100.545],
+                [23.015, 98.67],
+            ];
+            //区县边界
+            let cityJSON = require("@/assets/map/530900_full.json");
+            let mapLayer = L.geoJSON(cityJSON, {
+                style: () => {
+                    return {
+                        zIndex: 2,
+                        color: "#DCDFE6",
+                        fill: false,
+                        weight: 2,
+                    };
+                },
+                pane: "tilePane",
+            });
+            mapLayer.addTo(this.map);
+
+            //区县名
+            let countyLayer = L.layerGroup();
+            this.regionList.forEach((item) => {
+                let countyMarker = L.marker(item.center, {
+                    icon: L.divIcon({
+                        className: "radarCountyName",
+                        html: "<span>" + item.name + "</span>",
+                        iconSize: [60, 40],
+                        iconAnchor: [30, 20],
+                    }),
+                    pane: "tilePane",
+                });
+                countyMarker.addTo(countyLayer);
+            });
+            countyLayer.addTo(this.map);
+        },
+    },
+};
+</script>
+<style>
+.radarCountyName {
+    color: #dcdfe6;
+    font-size: 18px;
+}
+.leaflet-overlay-pane{
+    z-index: -99;
+}
+</style>
+<style lang="scss" scoped>
+#mapTitle {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    color: #000;
+    text-align: center;
+    font-size: 20px;
+    pointer-events: none;
+}
+#Map {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    position: relative;
+}
+.shentu {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    z-index: 1;
+    color: #000;
+    text-align: center;
+    font-size: 16px;
+    pointer-events: none;
+}
+
+#legend {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1;
+    background: #fff;
+    border: 1px solid #888;
+    border-radius: 5px;
+    padding: 10px;
+    color: #000;
+    p.legendTitle {
+        text-align: center;
+        margin: 0 0 10px;
+        font-size: 18px;
+    }
+    span.legendColor {
+        display: inline-block;
+        width: 35px;
+        height: 35px;
+        border: 1px solid #fff;
+        vertical-align: bottom;
+    }
+    span.legendValue {
+        vertical-align: bottom;
+        padding-left: 10px;
+        font-size: 14px;
+    }
+}
+</style>

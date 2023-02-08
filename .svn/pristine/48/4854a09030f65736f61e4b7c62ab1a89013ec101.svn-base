@@ -1,0 +1,433 @@
+<template>
+    <div class="tableDiv">
+        <div class="tableTop">
+            <el-table
+                :data="tableData"
+                style="width: 100%"
+                :header-cell-style="getRowClass"
+                stripe
+                height="800"
+                show-summary
+                :summary-method="getSummaries"
+            >
+
+                <el-table-column
+                    v-for="item,index in keyList"
+                    :key="index"
+                    :prop="item"
+                    :label="getZW(item)"
+                    align="center"
+                >
+                </el-table-column>
+                <div slot="empty">
+                    <img
+                        src="../../assets/img/wuneirong.png"
+                        style="width: 280px; height: 280px"
+                    />
+
+                    <span style="
+                display: block;
+                font-size: 14px;
+                color: #888888;
+                margin-top: -25px;
+              ">暂无内容</span>
+                </div>
+            </el-table>
+        </div>
+        <div class="tableBottom">
+            <el-input
+                type="textarea"
+                :rows="5"
+                disabled
+                placeholder="请开始查询"
+                v-model="textarea"
+            >
+            </el-input>
+        </div>
+    </div>
+</template>
+<script>
+import { unique } from "../../utils/toolboxs";
+export default {
+    data() {
+        return {
+            textarea: "",
+        };
+    },
+    props: {
+        tableData: {
+            type: Array,
+        },
+        type: {
+            type: Number,
+        },
+        elementName: {
+            type: String,
+        },
+        keyList: {
+            type: Array,
+        },
+    },
+    methods: {
+        getRowClass({ rowIndex }) {
+            if (rowIndex == 0) {
+                return "background:#f8f8f9;";
+            }
+        },
+        avgnumber(ele) {
+            var num = 0;
+            var time = "";
+            var Namemax = "";
+            var Namemin = "";
+            var max = this.tableData[0][ele];
+            var min = this.tableData[0][ele];
+            var yaosu = "";
+            for (var i = 0; i < this.tableData.length; i++) {
+                if (
+                    this.tableData[i][ele] == "0" ||
+                    this.tableData[i][ele] == "999990" ||
+                    this.tableData[i][ele] == "999999" ||
+                    this.tableData[i][ele] == "-"
+                ) {
+                    return "";
+                } else {
+                    num += Number(this.tableData[i][ele]);
+                    time = this.tableData[i].Datetime;
+                    if (this.tableData[i][ele] > max) {
+                        max = this.tableData[i][ele];
+                        time = this.tableData[i].Datetime;
+                        Namemax = this.tableData[i].Station_Name;
+                        yaosu = this.getZW(ele);
+                    } else if (this.tableData[i][ele] < min) {
+                        min = this.tableData[i][ele];
+                        time = this.tableData[i].Datetime;
+                        Namemin = this.tableData[i].Station_Name;
+                        yaosu = this.getZW(ele);
+                    }
+                }
+            }
+            let avg = (num / this.tableData.length).toFixed(2);
+            return (
+                time +
+                "临沧市" +
+                "/" +
+                "平均值：" +
+                avg +
+                "/" +
+                Namemax +
+                " /" +
+                yaosu +
+                "/" +
+                "最大值：" +
+                max +
+                "/" +
+                Namemin +
+                " /" +
+                yaosu +
+                "/" +
+                "最小值：" +
+                min +
+                ",   "
+            );
+        },
+        getZW(item) {
+            switch (item) {
+                case "Datetime":
+                    return "时间";
+                case "Station_Name":
+                    return "站名";
+                case "Lat":
+                    return "纬度";
+                case "Lon":
+                    return "经度";
+                case "Station_Id_C":
+                    return "站点编号";
+                case "RHU_Avg":
+                    return "平均相对湿度";
+                case "RHU_Min":
+                    return "最小相对湿度";
+                case "PRE_Time_2020":
+                    return "20-20时降水量";
+                case "PRE_Time_0808":
+                    return "08-08时降水量";
+                case "WIN_S_2mi_Avg":
+                    return "平均2分钟风速";
+                case "WIN_S_Max":
+                    return "最大风速";
+                case "WIN_S_Inst_Max":
+                    return "极大风速";
+                case "GST_Avg_5cm":
+                    return "平均5cm地温";
+                case "GST_Avg_10cm":
+                    return "平均10cm地温";
+                case "GST_Avg_15cm":
+                    return "平均15cm地温";
+                case "GST_Avg_20cm":
+                    return "平均20cm地温";
+                case "GST_Avg_40cm":
+                    return "平均40cm地温";
+                case "GST_Avg_80cm":
+                    return "平均80cm地温";
+                case "GST_Avg_160cm":
+                    return "平均160cm地温";
+                case "GST_Avg_320cm":
+                    return "平均320cm地温";
+                case "RHU":
+                    return "相对湿度";
+                case "PRE_1h":
+                    return "过去1小时降水量";
+                case "GST":
+                    return "地面温度";
+                case "GST_Max":
+                    return "最高地面温度";
+                case "GST_Min":
+                    return "最低地面温度";
+                case "GST_Min_12h":
+                    return "过去12小时地面最低温度";
+                case "GST_5cm":
+                    return "5cm地温";
+                case "GST_10cm":
+                    return "10cm地温";
+                case "GST_15cm":
+                    return "15cm地温";
+                case "GST_20cm":
+                    return "20cm地温";
+                case "GST_40cm":
+                    return "40cm地温";
+                case "GST_80cm":
+                    return "80cm地温";
+                case "GST_160cm":
+                    return "160cm地温";
+                case "GST_320cm":
+                    return "320cm地温";
+                default:
+                    break;
+            }
+        },
+        getSummaries(param) {
+            const { columns, data } = param;
+            const sums = [];
+            columns.forEach((column, index) => {
+                if (index === 0) {
+                    sums[index] = (
+                        <p class="count_row">
+                            平均值
+                            <br />
+                            <br />
+                            最大值
+                            <br />
+                            <br />
+                            最小值
+                            <br />
+                        </p>
+                    );
+                    return;
+                } else if (index === 1) {
+                    sums[index] = "-";
+                    return;
+                } else if (index === 2) {
+                    sums[index] = "-";
+                    return;
+                } else if (index === 3) {
+                    sums[index] = "-";
+                    return;
+                } else if (index === 4) {
+                    sums[index] = "-";
+                    return;
+                }
+                let propertydata = {
+                    lingcang: [],
+                    shuangjiang: [],
+                    gengma: [],
+                    cangyuan: [],
+                    yunxian: [],
+                    yongde: [],
+                    fengqing: [],
+                    zhenkang: [],
+                };
+                let stationname = [];
+                let latlon = [];
+                let Datetime = [];
+                const values = data.map((item) =>
+                    Number(item[column.property])
+                );
+                data.map((item) => {
+                    Datetime.push(item.Datetime);
+                    stationname.push(item.Station_Name);
+
+                    let lastarr = Object.keys(item).pop();
+                    if (column.property == lastarr.toString()) {
+                        switch (item.Station_Name) {
+                            case "临沧":
+                                propertydata.lingcang.push(
+                                    item[column.property]
+                                );
+                                break;
+                            case "双江":
+                                propertydata.shuangjiang.push(
+                                    item[column.property]
+                                );
+                                break;
+                            case "耿马":
+                                propertydata.gengma.push(item[column.property]);
+                                break;
+                            case "沧源站":
+                                propertydata.cangyuan.push(
+                                    item[column.property]
+                                );
+                                break;
+                            case "云县":
+                                propertydata.yunxian.push(
+                                    item[column.property]
+                                );
+                                break;
+                            case "永德":
+                                propertydata.yongde.push(item[column.property]);
+                                break;
+                            case "凤庆国家气象观测站":
+                                propertydata.fengqing.push(
+                                    item[column.property]
+                                );
+                                break;
+                            case "镇康":
+                                propertydata.zhenkang.push(
+                                    item[column.property]
+                                );
+                                break;
+
+                            default:
+                                break;
+                        }
+                        /*   propertydata.push(item[column.property]); */
+                    }
+                });
+                if (data.length != 0) {
+                    let keysArrayTwo = Object.keys(data[0]).filter(
+                        (v) =>
+                            v !== "Datetime" &&
+                            v !== "Station_Name" &&
+                            v !== "Lat" &&
+                            v !== "Lon" &&
+                            v !== "Station_Id_C"
+                    );
+                    let arr = "";
+                    keysArrayTwo.map((v) => {
+                        arr += this.avgnumber(v);
+                    });
+                    this.textarea = arr;
+                }
+
+                var newArr = unique(data, "Station_Name");
+                newArr.map((item) => {
+                    if (
+                        Number(item[column.property]) == 999999 ||
+                        Number(item[column.property]) == 999990
+                    ) {
+                        return;
+                    } else {
+                        latlon.push(
+                            item.Lat +
+                                "-" +
+                                item.Lon +
+                                "-" +
+                                Number(item[column.property])
+                        );
+                    }
+                });
+                this.$emit(
+                    "eventBusClick",
+                    propertydata,
+                    stationname,
+                    latlon.toString(),
+                    Datetime
+                );
+                if (data.length != 0) {
+                    let keysArray = Object.keys(data[0]).filter(
+                        (v) =>
+                            v !== "Datetime" &&
+                            v !== "Station_Name" &&
+                            v !== "Lat" &&
+                            v !== "Lon" &&
+                            v !== "Station_Id_C"
+                    );
+                    let resObj = keysArray.reduce((prev, key) => {
+                        let list = data.map((v) => v[key]);
+                        let filterList = list.filter(
+                            (v) =>
+                                !(
+                                    v == null ||
+                                    v === "-" ||
+                                    v == "999990" ||
+                                    v == "999999"
+                                )
+                        );
+                        if (filterList.length === 0) {
+                            prev[key] = null;
+                            return prev;
+                        }
+
+                        let max = filterList.sort((a, b) => b - a)[0];
+
+                        let min = filterList.sort((a, b) => a - b)[0];
+
+                        prev[key] = {
+                            max,
+                            min,
+                        };
+
+                        return prev;
+                    }, {});
+                    let totalCount = 0;
+                    if (!values.every((value) => isNaN(value))) {
+                        sums[index] = values.reduce((prev, curr) => {
+                            const value = Number(curr);
+                            if (!isNaN(value)) {
+                                totalCount++;
+                                return prev + curr;
+                            } else {
+                                return prev;
+                            }
+                        }, 0);
+                        if (totalCount) {
+                            sums[index] = sums[index] / totalCount;
+                            sums[index] = sums[index].toFixed(2);
+                            sums[index] = (
+                                <p class="count_row">
+                                    {sums[index]}
+                                    <br />
+                                    <br />
+                                    {resObj[column.property]["max"]}
+                                    <br />
+                                    <br />
+                                    {resObj[column.property]["min"]}
+                                    <br />
+                                </p>
+                            );
+                        }
+                    } else {
+                        sums[index] = "-";
+                    }
+                }
+            });
+            return sums;
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+.tableDiv {
+    height: 100%;
+    .tableTop {
+        .el-table--scrollable-x .el-table__body-wrapper {
+            overflow-x: auto;
+            height: 586px;
+        }
+    }
+    .el-table::before {
+        width: 0;
+    }
+    .tableBottom {
+        background: #fff;
+    }
+}
+</style>

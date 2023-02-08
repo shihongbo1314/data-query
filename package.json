@@ -1,0 +1,43 @@
+{
+  "name": "data-query",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "babel-polyfill": "^6.26.0",
+    "core-js": "^3.6.5",
+    "dom-to-image": "^2.6.0",
+    "echarts": "^5.3.2",
+    "element-ui": "^2.15.8",
+    "file-saver": "^2.0.5",
+    "jquery": "^3.6.3",
+    "leaflet": "^1.8.0",
+    "vue": "^2.6.11",
+    "vue-svg-icon": "^1.2.9",
+    "vue2-leaflet": "^2.7.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~4.5.15",
+    "@vue/cli-service": "~4.5.15",
+   
+    "node-sass": "^7.0.1",
+    "sass": "^1.51.0",
+    "sass-loader": "^7.0.1",
+    "style-resources-loader": "^1.4.1",
+    "svg-sprite-loader": "^6.0.11",
+    "vue-cli-plugin-style-resources-loader": "~0.1.5",
+    "vue-template-compiler": "^2.6.11"
+  },
+  
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

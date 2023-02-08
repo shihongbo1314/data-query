@@ -1,0 +1,136 @@
+<template>
+    <div style="height:100%">
+        <l-map
+            style="height: 950px;background: rgb(255, 255, 255);"
+            :zoom='zoom'
+            :center='center'
+            :options="{zoomControl: false}"
+            ref="map"
+        >
+            <div id="mapTitle">{{timestart}}-{{timeend}}{{treeData.son}}分布图</div>
+             <l-image-overlay
+                    :url='past + url'
+                    :bounds="bounds"
+                ></l-image-overlay>
+            <span class="shentu">审图号：GS(2018)1709</span>
+            <div id="legend">
+                <p class="legendTitle">图例</p>
+                <ul>
+                    <li
+                        v-for="(item,index) in colorScale"
+                        :key="index"
+                    ><span
+                            class="legendColor"
+                            :style="`background:rgb(${item.r},${item.g},${item.b})`"
+                        ></span><span class="legendValue">{{item.value}}</span></li>
+                </ul>
+            </div>
+        </l-map>
+    </div>
+</template>
+<script>
+import { LMap,LImageOverlay } from "vue2-leaflet";
+export default {
+    data() {
+        return {
+            bounds: [
+                [98.65, 100.55],
+                [23, 25.05]
+            ],
+            zoom: 7,
+            center: [23.88, 100.08],
+            past: "http://172.24.97.251:8082/siteImg/",
+            timestart:'',
+            timeend:'',
+
+        };
+    },
+    components: {
+        LMap,
+        LImageOverlay,
+    },
+    props: {
+        url: {
+            type: String,
+        },
+        visiable: {
+            type: Boolean,
+            default: false,
+        },
+        startDateStrHHmmss: {
+            type: String,
+            default: "",
+        },
+        endDateStrHHmmss: {
+            type: String,
+            default: "",
+        },
+        colorScale: {
+            type: Array,
+        },
+        treeData: {
+            type: Object,
+        },
+    },
+    mounted(){
+         this.timestart = this.startDateStrHHmmss.substring(0,4)+',' + this.startDateStrHHmmss.substring(4,6)+',' + this.startDateStrHHmmss.substring(6,8)
+         this.timeend = this.endDateStrHHmmss.substring(0,4)+','+ this.endDateStrHHmmss.substring(4,6)+',' +this.endDateStrHHmmss.substring(6,8)
+    },
+    watch: {
+        visiable() {
+            this.$refs.map.mapObject.invalidateSize(true);
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+#mapTitle {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    color: #000;
+    text-align: center;
+    font-size: 20px;
+    pointer-events: none;
+}
+.shentu {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    z-index: 1;
+    color: #000;
+    text-align: center;
+    font-size: 16px;
+    pointer-events: none;
+}
+#legend {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1;
+    background: #fff;
+    border: 1px solid #888;
+    border-radius: 5px;
+    padding: 10px;
+    color: #000;
+    p.legendTitle {
+        text-align: center;
+        margin: 0 0 10px;
+        font-size: 18px;
+    }
+    span.legendColor {
+        display: inline-block;
+        width: 35px;
+        height: 35px;
+        border: 1px solid #fff;
+        vertical-align: bottom;
+    }
+    span.legendValue {
+        vertical-align: bottom;
+        padding-left: 10px;
+        font-size: 14px;
+    }
+}
+</style>

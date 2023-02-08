@@ -1,0 +1,600 @@
+<template>
+    <div class="dataQueryDiv">
+        <!-- 左侧部分，可收起 -->
+        <div
+            class="leftDiv"
+            v-show="leftShow"
+        >
+            <!-- 站点选择 -->
+            <StationSelect @StationSelectClick='StationSelectClick' />
+            <!-- 参数设置、要素管理 -->
+            <div class="leftDiv_leftBottom">
+                <ParamsSetUp @childByValue='childByValue' />
+                <ElementManage
+                    @setCheckedKeys='setCheckedKeys'
+                    @typecheck='typecheck'
+                />
+            </div>
+        </div>
+        <!-- 右侧部分 -->
+        <div
+            class="rightDiv"
+            :class="!leftShow ? 'name':'name1'"
+        >
+            <!-- 控制按钮 -->
+            <div class="controlBtn">
+                <ul ref="ulBox">
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        :content="leftShow?'收起':'展开'"
+                        placement="right"
+                    >
+                        <li @click="leftShow = !leftShow">
+                            <svg-icon
+                                :icon-class="leftShow?'close':'open'"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="查询"
+                        placement="right"
+                    >
+                        <li
+                            :class="isshow== 1 ? 'active' :''"
+                            @click="Findclick"
+                        >
+                            <svg-icon
+                                icon-class="seach"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="重置"
+                        placement="right"
+                    >
+                        <li
+                            :class="isshow== 2 ? 'active' :''"
+                            @click="reset(2)"
+                        >
+                            <svg-icon
+                                icon-class="refresh"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="数据表格"
+                        placement="right"
+                    >
+                        <li
+                            :class="isshow== 3 ? 'active' :''"
+                            @click="getStationData(3)"
+                        >
+                            <svg-icon
+                                icon-class="table"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="柱状图"
+                        placement="right"
+                    >
+                        <li
+                            @click="histogram(4)"
+                            :class="isshow==4 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="bar"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="折线图"
+                        placement="right"
+                    >
+                        <li
+                            @click="lineClick(5)"
+                            :class="isshow==5 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="line"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="等值面图"
+                        placement="right"
+                    >
+                        <li
+                            @click="Contour(6)"
+                            :class="isshow==6 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="map"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="设置"
+                        placement="right"
+                    >
+                        <li
+                            @click="setting(7)"
+                            :class="isshow==7 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="settings"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="下载"
+                        placement="right"
+                    >
+                        <li
+                            @click="download(8)"
+                            :class="isshow==8 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="download"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+                </ul>
+            </div>
+            <!-- 查询内容展示区域 -->
+            <div
+                class="mainContent"
+                ref="areaRisk"
+            >
+                <TableRight
+                    v-if="isshow == 3"
+                    :tableData='tableData'
+                    v-loading="loadingtable"
+                    :type='type'
+                    :elementName='this.treeData.son'
+                />
+                <Histogram
+                    v-else-if="isshow == 4"
+                    :visiable='leftShow'
+                    :GST_AvgData='GST_AvgData'
+                    :Station_NameData='Station_NameData'
+                    :startDateStr='this.userData.startDateStr'
+                    :endDateStr='this.userData.endDateStr'
+                />
+                <Linepicture
+                    v-else-if="isshow == 5"
+                    :visiable='leftShow'
+                    :GST_AvgData='GST_AvgData'
+                    :Station_NameData='Station_NameData'
+                    :startDateStr='this.userData.startDateStr'
+                    :endDateStr='this.userData.endDateStr'
+                />
+                <Leaflet
+                    :url="url"
+                    v-else-if="isshow == 6"
+                    v-loading="loading"
+                    :visiable='leftShow'
+                    :startDateStr='this.userData.startDateStr'
+                    :endDateStr='this.userData.endDateStr'
+                />
+                <el-dialog
+                    title="图例配置"
+                    :visible.sync="dialogVisible"
+                    width="30%"
+                    :modal='false'
+                    style="left:35%"
+                >
+                    <div style="font-size:16px;margin: 10px 0;">要素:{{this.treeData.parent}}</div>
+                    <div style="font-size:16px">级别数量: <el-select
+                            v-model="value"
+                            placeholder="请选择"
+                            size="small"
+                        >
+                            <el-option
+                                v-for="item in options"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value"
+                            >
+                            </el-option>
+                        </el-select>
+                    </div>
+                    <div style="font-size:16px;margin: 10px 0;height:320px;display:flex;line-height:320px">
+                        <div style="width: 100px;">色标颜色</div>
+                        <div>
+                            <el-radio-group v-model="radio">
+                                <el-radio :label="3">备选项</el-radio>
+                                <el-radio :label="6">备选项</el-radio>
+                                <el-radio :label="9">备选项</el-radio>
+                                <el-radio :label="12">备选项</el-radio>
+                            </el-radio-group>
+                        </div>
+                    </div>
+                    <span
+                        slot="footer"
+                        class="dialog-footer"
+                    >
+                        <el-button size="small">设为默认</el-button>
+                        <el-button
+                            type="primary"
+                            @click="dialogVisible = false"
+                            size="small"
+                        >确 定</el-button>
+                    </span>
+                </el-dialog>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+// import axios from "@/api/request.js"
+import axiosAll from "axios";
+import StationSelect from "@/components/dataQuery/station.vue";
+import ParamsSetUp from "@/components/dataQuery/params.vue";
+import ElementManage from "@/components/dataQuery/element.vue";
+import TableRight from "@/components/dataQuery/table.vue";
+import Histogram from "@/components/dataQuery/histogram.vue";
+import Linepicture from "@/components/dataQuery/linepicture.vue";
+import Leaflet from "../components/dataQuery/leaflet.vue";
+import domtoimage from "dom-to-image";
+export default {
+    components: {
+        StationSelect,
+        ParamsSetUp,
+        ElementManage,
+        TableRight,
+        Histogram,
+        Linepicture,
+        Leaflet,
+    },
+    data() {
+        return {
+            leftShow: true,
+            isshow: 3,
+            userData: {} /* 子组件传递的值 */,
+            tableData: [],
+            GST_AvgData: [],
+            Station_NameData: [],
+            url: "",
+            loading: false,
+            loadingtable: false,
+            dialogVisible: false,
+            treeData: "",
+            type: null,
+            radio: 3,
+            value: "",
+            options: [],
+            checkedKeys: [], // 勾选的站点id
+        };
+    },
+    watch: {
+        treeData() {
+            this.tableData = [];
+        },
+    },
+    methods: {
+        childByValue(userData) {
+            this.userData = userData;
+        },
+        StationSelectClick(checkedKeys) {
+           /*  console.log(checkedKeys); */
+            this.checkedKeys = checkedKeys;
+        },
+        setCheckedKeys(label) {
+            this.treeData = label;
+        },
+        typecheck(label) {
+            this.type = label;
+            this.tableData = [];
+        },
+        Findclick() {
+            this.getdata();
+        },
+        getdata() {
+            if (this.type == 2 && this.treeData.son == undefined) {
+                this.$notify.error({
+                    title: "要素不能为空",
+                    offset: 200,
+                });
+            } else if (
+                this.userData.startDateStr != "" ||
+                this.userData.startDateStrHHmmss != ""
+            ) {
+                this.loadingtable = true;
+                axiosAll
+                    .get(
+                        "http://61.153.185.211:9080/WeiFang/cimissDataStatistics/listData.do",
+                        {
+                            params: {
+                                baseDataType: "日值数据",
+                                stationType: "自动气象观测站",
+                                queryType: this.userData.choose,
+                                elementType:
+                                    this.type == 1
+                                        ? "全部"
+                                        : this.treeData.parent,
+                                elementName:
+                                    this.type == 1 ? "全部" : this.treeData.son,
+                                elementCode: "ALL_Element",
+                                elemetnBaseCode: "ALL_Element",
+                                dataType: "NORMAL",
+                                dateType: this.userData.type,
+                                staIds: this.checkedKeys.toString(),
+                                startDateStr:
+                                    this.userData.type == "日"
+                                        ? this.userData.startDateStr
+                                        : this.userData.startDateStrHHmmss,
+                                endDateStr:
+                                    this.userData.type == "日"
+                                        ? this.userData.endDateStr
+                                        : this.userData.endDateStrHHmmss,
+                                stationFlag: 0,
+                                limitCondition: "",
+                                otherInfo: "",
+                            },
+                        }
+                    )
+                    .then((res) => {
+                        this.loadingtable = false;
+                        if (res.data.data == null) {
+                            this.GST_AvgData = [];
+                            this.Station_NameData = [];
+                            this.tableData = [];
+                            this.$notify.error({
+                                title: "暂无数据",
+                                offset: 200,
+                            });
+                        } else {
+                            this.tableData = res.data.data;
+                            this.GST_AvgData = [];
+                            this.Station_NameData = [];
+                            this.tableData.map((item) => {
+                                this.GST_AvgData.push(item.GST_Avg);
+                                this.Station_NameData.push(item.Station_Name);
+                            });
+                        }
+                    });
+            } else {
+                this.$notify.error({
+                    title: "请先选择时间！",
+                    offset: 200,
+                });
+            }
+        },
+        getStationData(index) {
+            this.getdata();
+            this.isshow = index;
+        },
+        reset(index) {
+            this.isshow = index;
+            location.reload();
+        },
+        tabClick(index) {
+            this.isshow = index;
+        },
+        histogram(index) {
+            if (this.type == 1) {
+                this.$notify.error({
+                    title: "请选择单项要素查询",
+                    offset: 200,
+                });
+            } else {
+                this.isshow = index;
+            }
+        },
+        lineClick(index) {
+            if (this.type == 1) {
+                this.$notify.error({
+                    title: "请选择单项要素查询",
+                    offset: 200,
+                });
+            } else {
+                this.isshow = index;
+            }
+        },
+        Contour(index) {
+            if (this.type == 1) {
+                this.$notify.error({
+                    title: "请选择单项要素查询",
+                    offset: 200,
+                });
+            } else {
+                this.isshow = index;
+                this.loading = true;
+                axiosAll
+                    .get(
+                        "http://61.153.185.211:9080/WeiFang/cimiss/data/generateImgByDataList.do",
+                        {
+                            params: {
+                                dataJsonStr: {
+                                    54831: 13.9,
+                                    54832: 15,
+                                    54835: 14.4,
+                                    54837: 14.3,
+                                    54841: 15,
+                                    54843: 15.5,
+                                    54844: 15,
+                                    54846: 14.9,
+                                    54848: 14.4,
+                                },
+                                regionCode: 370700,
+                                dataStr:
+                                    this.userData.startDateStr +
+                                    "_" +
+                                    this.userData.endDateStr,
+                                dateType: "NORMAL",
+                                element: "TEM_Avg",
+                                colorType: "warm_min_6",
+                                clientUuid: "1653292157084130000",
+                                title: false,
+                                mapnum: "审图号：GS(2018)1709",
+                            },
+                        }
+                    )
+                    .then((res) => {
+                        /* console.log(res) */
+                        this.url = res.data.data;
+                        /*  axiosAll.get(`http://61.153.185.211:9080/WEIFANG_FILE/${this.url.replace('_region.png','.color')}`).then((res)=>{
+                        
+                        console.log(res)
+                    }) */
+                        this.loading = false;
+                    });
+            }
+        },
+        setting() {
+            this.dialogVisible = true;
+        },
+        download() {
+            this.$confirm("此操作将保存图片, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            })
+                .then(() => {
+                    var vv = this.$refs.areaRisk;
+                    domtoimage.toPng(vv).then((dataUrl) => {
+                        //保存图片
+                        var alink = document.createElement("a");
+                        alink.href = dataUrl;
+                        alink.download = ""; //图片名
+                        alink.click();
+                        this.loading = false;
+                    });
+                    this.loading = true;
+                    this.loading_text = "保存图片中";
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消保存",
+                    });
+                });
+        },
+    },
+};
+</script>
+
+<style scoped lang="scss">
+.dataQueryDiv {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+}
+#dataQueryIframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+.dataQueryDiv > div {
+    height: 100%;
+}
+.name {
+    width: 100% !important;
+}
+.name1 {
+    width: 65% !important;
+}
+/**左侧：站点选择、参数设置、要素管理 */
+.leftDiv {
+    width: 35%;
+    display: flex;
+
+    & > div {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        box-sizing: border-box;
+        border-right: 1px solid #adb3bb;
+    }
+    /** 参数设置、要素管理 */
+    .leftDiv_leftBottom {
+        display: flex;
+        flex-direction: column;
+        div:first-child {
+        }
+        div:last-child {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+    }
+}
+
+/**右侧：控制按钮和内容 */
+.rightDiv {
+    display: flex;
+    width: 65%;
+    .controlBtn {
+        width: 48px;
+        ul {
+            width: 48px;
+        }
+    }
+    .mainContent {
+        width: 100%;
+        overflow-x: auto;
+        border-left: 1px solid #adb3bb;
+        ::v-deep.el-dialog__body {
+            padding: 10px 30px !important;
+        }
+    }
+}
+
+/**按钮 */
+.controlBtn {
+    ul li {
+        text-align: center;
+        padding: 8px 0;
+        cursor: pointer;
+        .icon {
+            width: 32px;
+            height: 32px;
+            color: #546070;
+        }
+        &:hover,
+        &.active {
+            background: #dcecff;
+            .icon {
+                color: #3e87f4;
+            }
+        }
+    }
+}
+</style>>

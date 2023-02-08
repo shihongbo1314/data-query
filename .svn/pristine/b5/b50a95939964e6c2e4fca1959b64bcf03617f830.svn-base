@@ -1,0 +1,135 @@
+[
+    {
+        "id": 1,
+        "text": "平均气温",
+        "value": "TEM_Avg",
+        "type": "气温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 2,
+        "text": "最高气温",
+        "value": "TEM_Max",
+        "type": "气温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 3,
+        "text": "最低气温",
+        "value": "TEM_Min",
+        "type": "气温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 4,
+        "text": "平均相对湿度",
+        "value": "RHU_Avg",
+        "type": "湿度",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 5,
+        "text": "最小相对湿度",
+        "value": "RHU_Min",
+        "type": "湿度",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 6,
+        "text": "20-20时降水量",
+        "value": "PRE_Time_2020",
+        "type": "降水",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 7,
+        "text": "08-08时降水量",
+        "value": "PRE_Time_0808",
+        "type": "降水",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 8,
+        "text": "平均2分钟风速",
+        "value": "WIN_S_2mi_Avg",
+        "type": "风速",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 9,
+        "text": "最大风速",
+        "value": "WIN_S_Max",
+        "type": "风速",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 10,
+        "text": "极大风速",
+        "value": "WIN_S_Inst_Max",
+        "type": "风速",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 11,
+        "text": "最低地面温度",
+        "value": "GST_Min",
+        "type": "气温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 12,
+        "text": "平均5cm地温",
+        "value": "GST_Avg_5cm",
+        "type": "地温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 13,
+        "text": "平均10cm地温",
+        "value": "GST_Avg_10cm",
+        "type": "地温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 14,
+        "text": "平均15cm地温",
+        "value": "GST_Avg_15cm",
+        "type": "地温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 15,
+        "text": "平均20cm地温",
+        "value": "GST_Avg_20cm",
+        "type": "地温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 16,
+        "text": "平均40cm地温",
+        "value": "GST_Avg_40cm",
+        "type": "地温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 17,
+        "text": "平均80cm地温",
+        "value": "GST_Avg_80cm",
+        "type": "地温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 18,
+        "text": "平均160cm地温",
+        "value": "GST_Avg_160cm",
+        "type": "地温",
+        "intervaltime": "DAY"
+    },
+    {
+        "id": 19,
+        "text": "平均320cm地温",
+        "value": "GST_Avg_320cm",
+        "type": "地温",
+        "intervaltime": "DAY"
+    }
+]

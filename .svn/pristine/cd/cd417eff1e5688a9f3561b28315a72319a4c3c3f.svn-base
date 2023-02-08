@@ -1,0 +1,165 @@
+<template>
+    <div style="overflow: auto;">
+        <div class="top">参数设置</div>
+        <div class="middle">
+            <table>
+                <tbody>
+                    <tr>
+                        <td :colspan="2">
+                            <el-row>
+                                <el-radio-group
+                                    v-model="type"
+                                    @change="changetype"
+                                >
+                                    <el-radio
+                                        :label="1"
+                                        v-if="disabled"
+                                        disabled
+                                    >多要素</el-radio>
+                                    <el-radio
+                                        :label="1"
+                                        v-else
+                                    >多要素</el-radio>
+                                    <el-radio :label="2">单要素</el-radio>
+                                </el-radio-group>
+                            </el-row>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="bottom">
+            <el-tree
+                class="treeDiv"
+                v-if="type == 1"
+                :data="treeData2"
+                node-key="id"
+                show-checkbox
+                ref="tree"
+                default-expand-all
+                check-on-click-node
+                :props="defaultProps"
+                :default-checked-keys="defaultTree"
+                @check-change="handleCheckChangeone"
+            >
+            </el-tree>
+            <el-tree
+                :class="type == 1?'treeDiv':'treeDiv singleTree'"
+                v-else
+                :data="treeData1"
+                :check-strictly="true"
+                show-checkbox
+                ref="tree"
+                node-key="id"
+                :props="defaultProps"
+                check-on-click-node
+                @check-change="handleCheckChange"
+            >
+            </el-tree>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            type: 1,
+            defaultTree: [] /* 默认选中的 */,
+            defaultProps: {
+                children: "children",
+                label: "label",
+            },
+        };
+    },
+    props: {
+        treeData2: {
+            type: Array,
+        },
+        treeData1: {
+            type: Array,
+        },
+        arr: {
+            type: Array,
+        },
+        typevalue: {
+            type: Number,
+            default: 1,
+        },
+        disabled: {
+            type: Boolean,
+            default: false,
+        },
+    },
+    watch: {
+        typevalue(val) {
+            this.type = val;
+        },
+        arr(val) {
+            if (val) {
+                setTimeout(() => {
+                    let list = [];
+                    this.arr.forEach((item) => {
+                        list.push(item.id);
+                    });
+                    this.defaultTree = list;
+                }, 100);
+            }
+        },
+    },
+    mounted() {
+        this.$emit("typecheck", this.type);
+    },
+    methods: {
+        handleCheckChange(data, checked) {
+            if (checked) {
+                this.treeData1.id = data.id;
+                this.$refs.tree.setCheckedKeys([data.id]);
+                const treeData = {
+                    parent: this.$refs.tree.getNode(data.id).parent.label,
+                    son: data.label,
+                    elementCode: data.elementCode,
+                };
+                this.$emit("setCheckedKeys", treeData);
+            }
+        },
+        handleCheckChangeone(data, checked) {
+            if (checked) {
+                const treeData = {
+                    parent: this.$refs.tree.getNode(data.id).parent.label,
+                    son: data.label,
+                    elementCode: data.elementCode,
+                };
+                this.$emit("setCheckedKeys", treeData);
+            }
+        },
+        changetype() {
+            this.$emit("typecheck", this.type);
+        },
+    },
+};
+</script>
+
+<style lang="scss" scoped>
+@import "../../assets/css/dataQuery.scss";
+table tbody tr:last-child td:first-child {
+    border-right: 0;
+    text-align: center;
+}
+.el-radio-group {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+/deep/
+    .singleTree.el-tree
+    .el-tree-node
+    .is-leaf
+    + .el-checkbox
+    .el-checkbox__inner {
+    display: inline-block;
+}
+/deep/ .singleTree.el-tree .el-tree-node .el-checkbox .el-checkbox__inner {
+    display: none;
+}
+</style>

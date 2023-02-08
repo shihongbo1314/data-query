@@ -1,0 +1,1923 @@
+<template>
+    <div class="dataQueryDiv">
+        <!-- 左侧部分，可收起 -->
+        <div
+            class="leftDiv"
+            v-show="leftShow"
+        >
+            <!-- 站点选择 -->
+            <StationSelect @StationSelectClick='StationSelectClick' />
+            <!-- 参数设置、要素管理 -->
+            <div class="leftDiv_leftBottom">
+                <ParamsSetUp @childByValue='childByValue' />
+                <ElementManage
+                    @setCheckedKeys='setCheckedKeys'
+                    @typecheck='typecheck'
+                    :arr='arr'
+                    :treeData='treeData'
+                    :typevalue='typevalue'
+                    :disabled='disabled'
+                />
+            </div>
+        </div>
+        <!-- 右侧部分 -->
+        <div
+            class="rightDiv"
+            :class="!leftShow ? 'name':'name1'"
+        >
+            <!-- 控制按钮 -->
+            <!--  <div class="controlBtn">
+                <ul ref="ulBox">
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        :content="leftShow?'收起':'展开'"
+                        placement="right"
+                    >
+                        <li @click="leftShow = !leftShow">
+                            <svg-icon
+                                :icon-class="leftShow?'close':'open'"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="查询"
+                        placement="right"
+                    >
+                        <li
+                            :class="isshow== 1 ? 'active' :''"
+                            @click="Findclick"
+                        >
+                            <svg-icon
+                                icon-class="seach"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="重置"
+                        placement="right"
+                    >
+                        <li
+                            :class="isshow== 2 ? 'active' :''"
+                            @click="reset(2)"
+                        >
+                            <svg-icon
+                                icon-class="refresh"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="数据表格"
+                        placement="right"
+                    >
+                        <li
+                            :class="isshow== 3 ? 'active' :''"
+                            @click="getStationData(3)"
+                        >
+                            <svg-icon
+                                icon-class="table"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="柱状图"
+                        placement="right"
+                    >
+                        <li
+                            @click="histogram(4)"
+                            :class="isshow==4 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="bar"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="折线图"
+                        placement="right"
+                    >
+                        <li
+                            @click="lineClick(5)"
+                            :class="isshow==5 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="line"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="等值面图"
+                        placement="right"
+                    >
+                        <li
+                            @click="Contour(6)"
+                            :class="isshow==6 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="map"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="设置"
+                        placement="right"
+                    >
+                        <li
+                            @click="setting(7)"
+                            :class="isshow==7 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="settings"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+
+                    <el-tooltip
+                        class="item"
+                        effect="dark"
+                        content="下载"
+                        placement="right"
+                    >
+                        <li
+                            @click="download(8)"
+                            :class="isshow==8 ? 'active' :''"
+                        >
+                            <svg-icon
+                                icon-class="download"
+                                class="icon"
+                            ></svg-icon>
+                        </li>
+                    </el-tooltip>
+                </ul>
+            </div> -->
+            <div
+                :class="!leftShow ? 'firstbox1':'firstbox'"
+                @click="leftShow = !leftShow"
+            >
+                <img
+                    src="@/assets/left.png"
+                    style="width: 16px;height: 16px;"
+                    v-if="leftShow"
+                >
+                <img
+                    v-else
+                    src="@/assets/right.png"
+                    style="width: 16px;height: 16px;"
+                >
+                <span>收起</span>
+            </div>
+            <div
+                :class="!leftShow ? 'secondbox1':'secondbox'"
+                @click="getStationData(3)"
+            >
+                <span>确定查询</span>
+            </div>
+            <div
+                :class="!leftShow ? 'threebox1':'threebox'"
+                @click="reset(2)"
+            >
+                <span>重置选项</span>
+            </div>
+            <!-- 查询内容展示区域 -->
+            <div
+                class="mainContent"
+                ref="areaRisk"
+            >
+                <div class="buttton_right">
+                    <span class="top_title">气象站点查询结果展示</span>
+                    <div class="echartsList">
+                        <el-radio
+                            v-model="radio1"
+                            label="1"
+                            border
+                            size="medium"
+                        >&nbsp;<img
+                                v-if="radio1 == 1"
+                                src="../assets/img/list2.png"
+                                style="width: 16px; height: 16px; vertical-align: middle"
+                            />
+                            <img
+                                v-else
+                                src="../assets/img/list1.png"
+                                style="width: 16px; height: 16px; vertical-align: middle"
+                            />&nbsp;&nbsp;列表
+                        </el-radio>
+                        <el-radio
+                            v-model="radio1"
+                            label="2"
+                            border
+                            size="medium"
+                        ><img
+                                v-if="radio1 == 2"
+                                src="../assets/img/zhuzhuang2.png"
+                                style="width: 16px; height: 16px; vertical-align: middle"
+                            />
+                            <img
+                                v-else
+                                src="../assets/img/zhuzhuang1.png"
+                                style="width: 16px; height: 16px; vertical-align: middle"
+                            />&nbsp;柱状图
+                        </el-radio>
+                        <el-radio
+                            v-model="radio1"
+                            label="3"
+                            border
+                            size="medium"
+                        ><img
+                                v-if="radio1 == 3"
+                                src="../assets/img/zhexian2.png"
+                                style="width: 16px; height: 16px; vertical-align: middle"
+                            /><img
+                                v-else
+                                src="../assets/img/zhexian1.png"
+                                style="width: 16px; height: 16px; vertical-align: middle"
+                            />&nbsp;折线图</el-radio>
+                        <el-radio
+                            v-model="radio1"
+                            label="4"
+                            border
+                            size="medium"
+                        ><img
+                                v-if="radio1 == 4"
+                                src="../assets/img/fenbu2.png"
+                                style="width: 16px; height: 16px; vertical-align: middle"
+                            /><img
+                                v-else
+                                src="../assets/img/fenbu1.png"
+                                style="width: 16px; height: 16px; vertical-align: middle"
+                            />&nbsp;分布图</el-radio>
+                    </div>
+                    <button
+                        class="btn2"
+                        @click="settingOne(7)"
+                    >
+                        <img
+                            src="../assets/img/shezhi.png"
+                            style="width: 16px;height: 16px;margin-right: 4px;vertical-align: middle;"
+                        />
+                        <span style="">图例设置</span>
+
+                    </button>
+                    <button
+                        class="btn"
+                        @click="downloadOne(8)"
+                    >
+                        <img
+                            src="../assets/img/download.png"
+                            style="width: 16px;height: 16px;margin-right: 4px;vertical-align: middle;"
+                        />
+                        下载
+                    </button>
+
+                </div>
+                <TableRight
+                    v-if="isshow == 3"
+                    :tableData='tableData'
+                    :keyList='keyList'
+                    v-loading="loadingtable"
+                    :type='type'
+                    :elementName='this.treeData.label'
+                    @eventBusClick='eventBusClick'
+                />
+                <Histogram
+                    v-else-if="isshow == 4"
+                    :visiable='leftShow'
+                    :Station_NameData='Station_NameData'
+                    :AvgData='AvgData'
+                    :Datetime='Datetime'
+                    :startDateStrHHmmss='this.userData.startDateStrHHmmss'
+                    :endDateStrHHmmss='this.userData.endDateStrHHmmss'
+                    :name='this.treeData.name'
+                />
+                <Linepicture
+                    v-else-if="isshow == 5"
+                    :visiable='leftShow'
+                    :AvgData='AvgData'
+                    :Datetime='Datetime'
+                    :Station_NameData='Station_NameData'
+                    :startDateStrHHmmss='this.userData.startDateStrHHmmss'
+                    :endDateStrHHmmss='this.userData.endDateStrHHmmss'
+                    :name='this.treeData.name'
+                />
+                <Leaflet
+                    :url="url"
+                    :colorScale='colorScale'
+                    v-else-if="isshow == 6"
+                    v-loading="loading"
+                    :visiable='leftShow'
+                    :startDateStrHHmmss='this.userData.startDateStrHHmmss'
+                    :endDateStrHHmmss='this.userData.endDateStrHHmmss'
+                    :name='this.treeData.name'
+                />
+                <el-dialog
+                    title="图例配置"
+                    :visible.sync="dialogVisible"
+                    width="30%"
+                    :modal='false'
+                    style="left:35%"
+                >
+                    <div style="font-size:16px;margin: 10px 0;">要素:{{this.treeData.parent}}</div>
+                    <div style="font-size:16px">级别数量: <el-select
+                            v-model="value"
+                            placeholder="请选择"
+                            size="small"
+                            @change='changeNumber'
+                        >
+                            <el-option
+                                v-for="item in options"
+                                :key="item"
+                                :label="item"
+                                :value="item"
+                            >
+                            </el-option>
+                        </el-select>
+                    </div>
+                    <div style="font-size:16px;margin: 10px 0;height:220px;display:flex;line-height:150px">
+                        <div style="width: 100px;">色标颜色</div>
+                        <div>
+                            <el-radio-group v-model="radio">
+                                <el-radio :label="cool_max">
+                                    <ul
+                                        name="colorType"
+                                        class="colorType"
+                                    >
+                                        <li>
+                                            <span
+                                                class="legend"
+                                                :style="`background:rgb(${is.r},${is.g},${is.b})`"
+                                                v-for="is in cool_max_box"
+                                                :key="is.index"
+                                            />
+                                        </li>
+                                    </ul>
+                                </el-radio>
+                                <el-radio :label="warm_max">
+                                    <ul
+                                        name="colorType"
+                                        class="colorType"
+                                    >
+                                        <li>
+                                            <span
+                                                class="legend"
+                                                :style="`background:rgb(${is.r},${is.g},${is.b})`"
+                                                v-for="is in warm_max_box"
+                                                :key="is.index"
+                                            />
+
+                                        </li>
+                                    </ul>
+                                </el-radio>
+                                <el-radio :label="cool_min">
+                                    <ul
+                                        name="colorType"
+                                        class="colorType"
+                                    >
+                                        <li>
+                                            <span
+                                                class="legend"
+                                                :style="`background:rgb(${is.r},${is.g},${is.b})`"
+                                                v-for="is in cool_min_box"
+                                                :key="is.index"
+                                            />
+                                        </li>
+                                    </ul>
+                                </el-radio>
+                                <el-radio :label="warm_min">
+                                    <ul
+                                        name="colorType"
+                                        class="colorType"
+                                    >
+                                        <li>
+                                            <span
+                                                class="legend"
+                                                :style="`background:rgb(${is.r},${is.g},${is.b})`"
+                                                v-for="is in warm_min_box"
+                                                :key="is.index"
+                                            />
+                                        </li>
+                                    </ul>
+                                </el-radio>
+                                <el-radio
+                                    :label="custom_styly"
+                                    style="line-height: 25px;"
+                                >
+                                    自定义
+                                    <ul
+                                        name="colorType"
+                                        class="colorType"
+                                        v-if="radio == 'custom_styly_6' || radio == 'custom_styly_5' || radio == 'custom_styly_4' || radio == 'custom_styly_3'"
+                                    >
+                                        <li> <span
+                                                class="legend"
+                                                :style="`background:rgb(${is.r},${is.g},${is.b})`"
+                                                v-for="is in custom_styly_box"
+                                                :key="is.index"
+                                            /></li>
+
+                                    </ul>
+                                </el-radio>
+
+                            </el-radio-group>
+                        </div>
+                    </div>
+                    <span
+                        slot="footer"
+                        class="dialog-footer"
+                    >
+                        <el-button
+                            size="small"
+                            @click="Setdefault"
+                        >设为默认</el-button>
+                        <el-button
+                            type="primary"
+                            @click="dialogVisible = false"
+                            size="small"
+                        >确 定</el-button>
+                    </span>
+                </el-dialog>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+// import axios from "@/api/request.js"
+import axiosAll from "axios";
+import StationSelect from "@/components/dataQuery/station.vue";
+import ParamsSetUp from "@/components/dataQuery/params.vue";
+import ElementManage from "@/components/dataQuery/element.vue";
+import TableRight from "@/components/dataQuery/table.vue";
+import Histogram from "@/components/dataQuery/histogram.vue";
+import Linepicture from "@/components/dataQuery/linepicture.vue";
+import Leaflet from "@/components/dataQuery/leaflet.vue";
+import domtoimage from "dom-to-image";
+import * as XlSX from "xlsx";
+import FileSaver from "file-saver"; // 数据下载
+export default {
+    components: {
+        StationSelect,
+        ParamsSetUp,
+        ElementManage,
+        TableRight,
+        Histogram,
+        Linepicture,
+        Leaflet,
+    },
+    data() {
+        return {
+            treeData: [
+                {
+                    label: "全部",
+                    id: 0,
+                    children: [],
+                },
+            ],
+            arr: [],
+            typevalue: 1,
+            disabled: false,
+            leftShow: true,
+            isshow: 3,
+            userData: {} /* 子组件传递的值 */,
+            tableData: [],
+            AvgData: [],
+            Station_NameData: [],
+            content: "",
+            url: "",
+            Datetime: [],
+            colorScale: [],
+            loading: false,
+            loadingtable: false,
+            dialogVisible: false,
+            type: null,
+            radio: "cool_max_6",
+            value: 6,
+            options: [3, 4, 5, 6],
+            checkedKeys: [
+                "56951",
+                "56950",
+                "56946",
+                "56944",
+                "56854",
+                "56849",
+                "56846",
+                "56839",
+            ], // 勾选的站点id
+            checkedCode: [], //勾选的站点code
+            cool_max_box: [
+                {
+                    r: "13",
+                    g: "105",
+                    b: "204",
+                },
+                {
+                    r: "74",
+                    g: "131",
+                    b: "247",
+                },
+                {
+                    r: "75",
+                    g: "171",
+                    b: "245",
+                },
+                {
+                    r: "134",
+                    g: "232",
+                    b: "250",
+                },
+                {
+                    r: "203",
+                    g: "251",
+                    b: "218",
+                },
+                {
+                    r: "240",
+                    g: "251",
+                    b: "179",
+                },
+            ],
+            cool_max: "cool_max_6",
+            warm_max_box: [
+                {
+                    r: "215",
+                    g: "61",
+                    b: "41",
+                },
+                {
+                    r: "232",
+                    g: "89",
+                    b: "56",
+                },
+                {
+                    r: "245",
+                    g: "119",
+                    b: "72",
+                },
+                {
+                    r: "251",
+                    g: "157",
+                    b: "89",
+                },
+                {
+                    r: "253",
+                    g: "189",
+                    b: "109",
+                },
+                {
+                    r: "254",
+                    g: "217",
+                    b: "133",
+                },
+            ],
+            warm_max: "warm_max_6",
+            cool_min_box: [
+                {
+                    r: "240",
+                    g: "251",
+                    b: "179",
+                },
+                {
+                    r: "203",
+                    g: "251",
+                    b: "218",
+                },
+                {
+                    r: "134",
+                    g: "232",
+                    b: "250",
+                },
+                {
+                    r: "75",
+                    g: "171",
+                    b: "245",
+                },
+                {
+                    r: "74",
+                    g: "131",
+                    b: "247",
+                },
+                {
+                    r: "13",
+                    g: "105",
+                    b: "204",
+                },
+            ],
+            cool_min: "cool_min_6",
+            warm_min_box: [
+                {
+                    r: "254",
+                    g: "217",
+                    b: "133",
+                },
+                {
+                    r: "253",
+                    g: "189",
+                    b: "109",
+                },
+                {
+                    r: "251",
+                    g: "157",
+                    b: "89",
+                },
+                {
+                    r: "245",
+                    g: "119",
+                    b: "72",
+                },
+                {
+                    r: "232",
+                    g: "89",
+                    b: "56",
+                },
+                {
+                    r: "215",
+                    g: "61",
+                    b: "41",
+                },
+            ],
+            warm_min: "warm_min_6",
+            custom_styly_box: [
+                {
+                    r: "254",
+                    g: "217",
+                    b: "133",
+                },
+                {
+                    r: "253",
+                    g: "189",
+                    b: "109",
+                },
+                {
+                    r: "251",
+                    g: "157",
+                    b: "89",
+                },
+                {
+                    r: "245",
+                    g: "119",
+                    b: "72",
+                },
+                {
+                    r: "232",
+                    g: "89",
+                    b: "56",
+                },
+                {
+                    r: "215",
+                    g: "61",
+                    b: "41",
+                },
+            ],
+            custom_styly: "custom_styly_6",
+            tableThead: [
+                { name: "站点", value: "Station_Id_C" },
+                { name: "站名", value: "Station_Name" },
+                { name: "日期", value: "Datetime" },
+                { name: "平均气温", value: "TEM_Avg" },
+                { name: "最高气温", value: "TEM_Max" },
+                { name: "最高气温时间", value: "TEM_Max_OTime" },
+                { name: "最低气温", value: "TEM_Min" },
+                { name: "最低气温时间", value: "TEM_Min_OTime" },
+            ],
+            keyList: [],
+            userInfo: null,
+            radio1: "1",
+        };
+    },
+    watch: {
+        treeData() {
+            this.tableData = [];
+        },
+        // 监听radio1
+        radio1(val) {
+            if (val == 1) {
+                this.getStationData(3);
+            } else if (val == 2) {
+                this.histogram(4);
+            } else if (val == 3) {
+                this.lineClick(5);
+            } else if (val == 4) {
+                this.Contour(6);
+            }
+        },
+    },
+    mounted() {},
+    methods: {
+        getlistElement(num) {
+            axiosAll
+                .post(
+                    "http://172.24.97.251:8082/elementlive/list?interval=" + num
+                )
+                /*   .get("./ceshi.json") */
+                .then((res) => {
+                    const treeData = res.data.d.reduce((cur, next) => {
+                        const obj = cur.find(
+                            (curItem) => curItem.label === next.type
+                        );
+                        if (obj) {
+                            if (obj.children.indexOf(next.text) === -1) {
+                                //去重处理
+                                obj.children.push({
+                                    ...next,
+                                    label: next.text,
+                                });
+                            }
+                        } else {
+                            const newObj = {
+                                label: next.type,
+                                id: next.id,
+                                children: [
+                                    {
+                                        ...next,
+                                        label: next.text,
+                                    },
+                                ],
+                            };
+                            cur.push(newObj);
+                        }
+                        return cur;
+                    }, []);
+                    treeData.shift();
+                    this.treeData[0].children = [];
+                    this.treeData[0].children.push(...treeData);
+                    this.arr = this.treeData[0].children;
+                });
+        },
+        changeNumber() {
+            this.radio = `cool_max_${this.value}`;
+            switch (this.value) {
+                case 3:
+                    this.cool_max_box = [
+                        {
+                            r: "13",
+                            g: "105",
+                            b: "204",
+                        },
+                        {
+                            r: "74",
+                            g: "131",
+                            b: "247",
+                        },
+                        {
+                            r: "75",
+                            g: "171",
+                            b: "245",
+                        },
+                    ];
+                    this.cool_max = "cool_max" + "_" + this.value;
+                    this.warm_max_box = [
+                        {
+                            r: "215",
+                            g: "61",
+                            b: "41",
+                        },
+                        {
+                            r: "232",
+                            g: "89",
+                            b: "56",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                    ];
+                    this.warm_max = "warm_max" + "_" + this.value;
+                    this.cool_min_box = [
+                        {
+                            r: "240",
+                            g: "251",
+                            b: "179",
+                        },
+                        {
+                            r: "203",
+                            g: "251",
+                            b: "218",
+                        },
+                        {
+                            r: "134",
+                            g: "232",
+                            b: "250",
+                        },
+                    ];
+                    this.cool_min = "cool_min" + "_" + this.value;
+                    this.warm_min_box = [
+                        {
+                            r: "254",
+                            g: "217",
+                            b: "133",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                    ];
+                    this.warm_min = "warm_min" + "_" + this.value;
+                    this.custom_styly_box = [
+                        {
+                            r: "254",
+                            g: "217",
+                            b: "133",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                    ];
+                    this.custom_styly = "custom_styly" + "_" + this.value;
+                    break;
+                case 4:
+                    this.cool_max_box = [
+                        {
+                            r: "13",
+                            g: "105",
+                            b: "204",
+                        },
+                        {
+                            r: "74",
+                            g: "131",
+                            b: "247",
+                        },
+                        {
+                            r: "75",
+                            g: "171",
+                            b: "245",
+                        },
+                        {
+                            r: "134",
+                            g: "232",
+                            b: "250",
+                        },
+                    ];
+                    this.cool_max = "cool_max" + "_" + this.value;
+                    this.warm_max_box = [
+                        {
+                            r: "215",
+                            g: "61",
+                            b: "41",
+                        },
+                        {
+                            r: "232",
+                            g: "89",
+                            b: "56",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                    ];
+                    this.warm_max = "warm_max" + "_" + this.value;
+                    this.cool_min_box = [
+                        {
+                            r: "240",
+                            g: "251",
+                            b: "179",
+                        },
+                        {
+                            r: "203",
+                            g: "251",
+                            b: "218",
+                        },
+                        {
+                            r: "134",
+                            g: "232",
+                            b: "250",
+                        },
+                        {
+                            r: "75",
+                            g: "171",
+                            b: "245",
+                        },
+                    ];
+                    this.cool_min = "cool_min" + "_" + this.value;
+                    this.warm_min_box = [
+                        {
+                            r: "254",
+                            g: "217",
+                            b: "133",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                    ];
+                    this.warm_min = "warm_min" + "_" + this.value;
+                    this.custom_styly_box = [
+                        {
+                            r: "254",
+                            g: "217",
+                            b: "133",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                    ];
+                    this.custom_styly = "custom_styly" + "_" + this.value;
+                    break;
+                case 5:
+                    this.cool_max_box = [
+                        {
+                            r: "13",
+                            g: "105",
+                            b: "204",
+                        },
+                        {
+                            r: "74",
+                            g: "131",
+                            b: "247",
+                        },
+                        {
+                            r: "75",
+                            g: "171",
+                            b: "245",
+                        },
+                        {
+                            r: "134",
+                            g: "232",
+                            b: "250",
+                        },
+                        {
+                            r: "203",
+                            g: "251",
+                            b: "218",
+                        },
+                    ];
+                    this.cool_max = "cool_max" + "_" + this.value;
+                    this.warm_max_box = [
+                        {
+                            r: "215",
+                            g: "61",
+                            b: "41",
+                        },
+                        {
+                            r: "232",
+                            g: "89",
+                            b: "56",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                    ];
+                    this.warm_max = "warm_max" + "_" + this.value;
+                    this.cool_min_box = [
+                        {
+                            r: "240",
+                            g: "251",
+                            b: "179",
+                        },
+                        {
+                            r: "203",
+                            g: "251",
+                            b: "218",
+                        },
+                        {
+                            r: "134",
+                            g: "232",
+                            b: "250",
+                        },
+                        {
+                            r: "75",
+                            g: "171",
+                            b: "245",
+                        },
+                        {
+                            r: "74",
+                            g: "131",
+                            b: "247",
+                        },
+                    ];
+                    this.cool_min = "cool_min" + "_" + this.value;
+                    this.warm_min_box = [
+                        {
+                            r: "254",
+                            g: "217",
+                            b: "133",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                        {
+                            r: "232",
+                            g: "89",
+                            b: "56",
+                        },
+                    ];
+                    this.warm_min = "warm_min" + "_" + this.value;
+                    this.custom_styly_box = [
+                        {
+                            r: "254",
+                            g: "217",
+                            b: "133",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                        {
+                            r: "232",
+                            g: "89",
+                            b: "56",
+                        },
+                    ];
+                    this.custom_styly = "custom_styly" + "_" + this.value;
+                    break;
+                case 6:
+                    (this.cool_max_box = [
+                        {
+                            r: "13",
+                            g: "105",
+                            b: "204",
+                        },
+                        {
+                            r: "74",
+                            g: "131",
+                            b: "247",
+                        },
+                        {
+                            r: "75",
+                            g: "171",
+                            b: "245",
+                        },
+                        {
+                            r: "134",
+                            g: "232",
+                            b: "250",
+                        },
+                        {
+                            r: "203",
+                            g: "251",
+                            b: "218",
+                        },
+                        {
+                            r: "240",
+                            g: "251",
+                            b: "179",
+                        },
+                    ]),
+                        (this.cool_max = "cool_max" + "_" + this.value);
+                    (this.warm_max_box = [
+                        {
+                            r: "215",
+                            g: "61",
+                            b: "41",
+                        },
+                        {
+                            r: "232",
+                            g: "89",
+                            b: "56",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                        {
+                            r: "254",
+                            g: "217",
+                            b: "133",
+                        },
+                    ]),
+                        (this.warm_max = "warm_max" + "_" + this.value);
+                    (this.cool_min_box = [
+                        {
+                            r: "240",
+                            g: "251",
+                            b: "179",
+                        },
+                        {
+                            r: "203",
+                            g: "251",
+                            b: "218",
+                        },
+                        {
+                            r: "134",
+                            g: "232",
+                            b: "250",
+                        },
+                        {
+                            r: "75",
+                            g: "171",
+                            b: "245",
+                        },
+                        {
+                            r: "74",
+                            g: "131",
+                            b: "247",
+                        },
+                        {
+                            r: "13",
+                            g: "105",
+                            b: "204",
+                        },
+                    ]),
+                        (this.cool_min = "cool_min" + "_" + this.value);
+                    (this.warm_min_box = [
+                        {
+                            r: "254",
+                            g: "217",
+                            b: "133",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                        {
+                            r: "232",
+                            g: "89",
+                            b: "56",
+                        },
+                        {
+                            r: "215",
+                            g: "61",
+                            b: "41",
+                        },
+                    ]),
+                        (this.warm_min = "warm_min" + "_" + this.value);
+                    this.custom_styly_box = [
+                        {
+                            r: "254",
+                            g: "217",
+                            b: "133",
+                        },
+                        {
+                            r: "253",
+                            g: "189",
+                            b: "109",
+                        },
+                        {
+                            r: "251",
+                            g: "157",
+                            b: "89",
+                        },
+                        {
+                            r: "245",
+                            g: "119",
+                            b: "72",
+                        },
+                        {
+                            r: "232",
+                            g: "89",
+                            b: "56",
+                        },
+                        {
+                            r: "215",
+                            g: "61",
+                            b: "41",
+                        },
+                    ];
+                    this.custom_styly = "custom_styly" + "_" + this.value;
+                    break;
+
+                default:
+                    break;
+            }
+        },
+        childByValue(userData) {
+            this.userData = userData;
+            this.getlistElement(userData.type);
+        },
+        StationSelectClick(checkedKeys) {
+            this.checkedKeys = checkedKeys;
+        },
+        setCheckedKeys(label, name, imagehour, imageelement) {
+            this.treeData.label = label;
+            this.treeData.name = name;
+            this.treeData.imagehour = imagehour;
+            this.treeData.imageelement = imageelement;
+        },
+        typecheck(label) {
+            this.type = label;
+            this.tableData = [];
+        },
+        Findclick() {
+            if (this.userData.type == "MINUTE") {
+                this.userData.type = "MIN";
+            } else if (this.userData.type == "YEAR") {
+                this.userData.type = "YER";
+            }
+            this.getdata();
+        },
+        Setdefault() {
+            if (
+                [
+                    "custom_styly_6",
+                    "custom_styly_5",
+                    "custom_styly_4",
+                    "custom_styly_3",
+                ].includes(this.radio)
+            ) {
+                this.$message.error("自定义不能设置为默认");
+            } else {
+                var params = new URLSearchParams();
+                params.append("id", 35);
+                params.append("defaultColorType", this.radio);
+                axiosAll
+                    .post(
+                        "http://61.153.185.211:9080/WeiFang/cimissDataStatistics/updateDefaultColotType.do",
+                        params
+                    )
+                    .then((res) => {
+                        if (res.data.state == 1001) {
+                            this.$message.success(res.data.message);
+                            this.dialogVisible = false;
+                        }
+                    });
+            }
+        },
+        getdata() {
+            if (this.type == 2 && !this.treeData.label) {
+                this.$notify.error({
+                    title: "要素不能为空",
+                    offset: 200,
+                });
+            } else if (
+                this.userData.startDateStr != "" ||
+                this.userData.startDateStrHHmmss != ""
+            ) {
+                this.loadingtable = true;
+                let timeArr = [];
+                timeArr.push(this.userData.startDateStrHHmmss);
+                timeArr.push(this.userData.endDateStrHHmmss);
+                axiosAll
+                    .post(
+                        "http://172.24.97.251:8082/weather/getDataByParam",
+                        null,
+                        {
+                            params: {
+                                interfaceId: "getSurfEleByTimeRangeAndStaID",
+                                dataCode: `SURF_CHN_MUL_${this.userData.type}`,
+                                timeRange: JSON.stringify(
+                                    timeArr.map((item) => item - 0)
+                                ),
+                                elements: `Datetime,Station_Name,Lat,Lon,Station_Id_C,${this.treeData.label}`,
+                                staIds: this.checkedKeys.toString(),
+                            },
+                        }
+                    )
+                    .then((res) => {
+                        this.loadingtable = false;
+                        if (res.data.d == null) {
+                            this.tableData = [];
+                            this.$notify.error({
+                                title: "暂无数据",
+                                offset: 200,
+                            });
+                        } else {
+                            let title = res.data.d.elementNames;
+                            let rowspan = res.data.d.data;
+                            let awe = [];
+                            for (let i = 0; i < rowspan.length; i++) {
+                                let obj = {};
+                                for (let j = 0; j < rowspan[i].length; j++) {
+                                    obj[title[j]] =
+                                        rowspan[i][j] == "999999" ||
+                                        rowspan[i][j] == "999990"
+                                            ? "-"
+                                            : rowspan[i][j];
+                                }
+                                awe.push(obj);
+                            }
+                            awe.sort((a, b) =>
+                                a.Datetime.localeCompare(b.Datetime)
+                            ); // 按照时间排序
+                            awe.forEach((it) => {
+                                it.Lat = Number(it.Lat).toFixed(2);
+                                it.Lon = Number(it.Lon).toFixed(2);
+                                if (
+                                    this.userData.type == "HOR" ||
+                                    this.userData.type == "MINUTE"
+                                ) {
+                                    it.Datetime = it.Datetime.slice(0);
+                                } else {
+                                    it.Datetime = it.Datetime.substring(0, 10);
+                                }
+                            });
+                            this.tableData = awe;
+                            console.log(this.tableData);
+                            this.keyList = Object.keys(this.tableData[0]);
+                        }
+                    });
+            } else {
+                this.$notify.error({
+                    title: "请先选择时间！",
+                    offset: 200,
+                });
+            }
+        },
+        getStationData(index) {
+            this.getdata();
+            this.isshow = index;
+            this.radio1 = "1";
+        },
+        reset(index) {
+            this.isshow = index;
+            location.reload();
+        },
+        tabClick(index) {
+            this.isshow = index;
+        },
+        histogram(index) {
+            if (this.type == 1) {
+                this.$notify.error({
+                    title: "请选择单项要素查询",
+                    offset: 200,
+                });
+            } else if (
+                this.userData.endDateStrHHmmss == "" ||
+                this.userData.startDateStrHHmmss == ""
+            ) {
+                this.$notify.error({
+                    title: "请先选择时间！",
+                    offset: 200,
+                });
+            } else {
+                this.isshow = index;
+            }
+        },
+        lineClick(index) {
+            if (this.type == 1) {
+                this.$notify.error({
+                    title: "请选择单项要素查询",
+                    offset: 200,
+                });
+            } else if (
+                this.userData.endDateStrHHmmss == "" ||
+                this.userData.startDateStrHHmmss == ""
+            ) {
+                this.$notify.error({
+                    title: "请先选择时间！",
+                    offset: 200,
+                });
+            } else {
+                this.isshow = index;
+            }
+        },
+        Contour(index) {
+            if (this.type == 1) {
+                this.$notify.error({
+                    title: "请选择单项要素查询",
+                    offset: 200,
+                });
+            } else if (
+                this.userData.endDateStrHHmmss == "" ||
+                this.userData.startDateStrHHmmss == ""
+            ) {
+                this.$notify.error({
+                    title: "请先选择时间！",
+                    offset: 200,
+                });
+            } else {
+                this.isshow = index;
+                this.loading = true;
+                axiosAll
+                    .post(
+                        "http://172.24.97.251:8082/weather/getImageByParam",
+                        null,
+                        {
+                            params: {
+                                element: this.treeData.imageelement,
+                                hour: this.treeData.imagehour,
+                                content: this.content,
+                                regionId: 1,
+                            },
+                        }
+                    )
+                    .then((res) => {
+                        this.colorScale = JSON.parse(
+                            res.data.o.slice(14, -10)
+                        ).filter((el, index) => {
+                            return index % 3 == 0;
+                        });
+                        this.url = res.data.d;
+                        this.loading = false;
+                    });
+            }
+        },
+        setting() {
+            this.dialogVisible = true;
+        },
+        download() {
+            if (this.isshow == 3) {
+                var wopts = {
+                    bookType: "xlsx",
+                    bookSST: true,
+                    type: "array",
+                };
+                var workBook = {
+                    SheetNames: ["Sheet1"],
+                    Sheets: {},
+                    Props: {},
+                };
+
+                workBook.Sheets["Sheet1"] = XlSX.utils.json_to_sheet(
+                    this.tableData
+                );
+
+                let vbouts = XlSX.write(workBook, wopts);
+
+                FileSaver.saveAs(
+                    new Blob([vbouts], {
+                        type: "application/octet-stream",
+                    }),
+                    "要素统计表.xlsx"
+                );
+            } else {
+                this.$confirm("此操作将保存图片, 是否继续?", "提示", {
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    type: "warning",
+                })
+                    .then(() => {
+                        var vv = this.$refs.areaRisk;
+                        domtoimage.toPng(vv).then((dataUrl) => {
+                            //保存图片
+                            var alink = document.createElement("a");
+                            alink.href = dataUrl;
+                            alink.download = ""; //图片名
+                            alink.click();
+                            this.loading = false;
+                        });
+                        this.loading = true;
+                        this.loading_text = "保存图片中";
+                    })
+                    .catch(() => {
+                        this.$message({
+                            type: "info",
+                            message: "已取消保存",
+                        });
+                    });
+            }
+        },
+        eventBusClick(param1, param2, param3, param4) {
+            this.AvgData = param1;
+            this.Station_NameData = param2;
+            this.content = param3;
+            this.Datetime = param4;
+        },
+    },
+};
+</script>
+
+<style scoped lang="scss">
+.dataQueryDiv {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+}
+#dataQueryIframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+.dataQueryDiv > div {
+    height: 100%;
+}
+.name {
+    width: 100% !important;
+}
+.name1 {
+    width: calc(100% - 520px) !important;
+}
+/**左侧：站点选择、参数设置、要素管理 */
+.leftDiv {
+    width: 520px;
+    display: flex;
+
+    & > div {
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        border-right: 1px solid #e5e7eb;
+        overflow: hidden;
+        width: 260px;
+    }
+    /** 参数设置、要素管理 */
+    .leftDiv_leftBottom {
+        display: flex;
+        flex-direction: column;
+        width: 260px;
+        div:first-child {
+        }
+        div:last-child {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+    }
+}
+
+/**右侧：控制按钮和内容 */
+.rightDiv {
+    display: flex;
+    width: 65%;
+    .controlBtn {
+        width: 48px;
+        ul {
+            width: 48px;
+        }
+    }
+    .firstbox {
+        width: 36px;
+        height: 64px;
+        background: #5e76aa;
+        box-shadow: 0px 0px 10px 0px #c9c9c9;
+        border-radius: 0px 4px 4px 0px;
+        position: absolute;
+        top: 112px;
+        left: 520px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        align-content: space-between;
+        flex-direction: column;
+        justify-content: space-evenly;
+        z-index: 999;
+        span {
+            width: 28px;
+            height: 20px;
+            font-size: 14px;
+            font-family: PingFangSC-Regular, PingFang SC;
+            font-weight: 400;
+            color: #ffffff;
+            line-height: 20px;
+        }
+    }
+    .secondbox {
+        width: 36px;
+        height: 64px;
+        background: #3168ec;
+        border-radius: 0px 4px 4px 0px;
+        position: absolute;
+        top: 176px;
+        left: 520px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        cursor: pointer;
+        z-index: 999;
+        span {
+            font-size: 14px;
+            font-family: PingFangSC-Regular, PingFang SC;
+            font-weight: 400;
+            color: #ffffff;
+            line-height: 20px;
+        }
+    }
+    .threebox {
+        width: 36px;
+        height: 64px;
+        background: #3195ec;
+        border-radius: 0px 4px 4px 0px;
+        position: absolute;
+        top: 240px;
+        left: 520px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        cursor: pointer;
+        z-index: 999;
+        span {
+            font-size: 14px;
+            font-family: PingFangSC-Regular, PingFang SC;
+            font-weight: 400;
+            color: #ffffff;
+            line-height: 20px;
+        }
+    }
+    .firstbox1 {
+        width: 36px;
+        height: 64px;
+        background: #5e76aa;
+        box-shadow: 0px 0px 10px 0px #c9c9c9;
+        border-radius: 0px 4px 4px 0px;
+        position: absolute;
+        top: 112px;
+        left: 0px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        align-content: space-between;
+        flex-direction: column;
+        justify-content: space-evenly;
+        z-index: 999;
+        span {
+            width: 28px;
+            height: 20px;
+            font-size: 14px;
+            font-family: PingFangSC-Regular, PingFang SC;
+            font-weight: 400;
+            color: #ffffff;
+            line-height: 20px;
+        }
+    }
+    .secondbox1 {
+        width: 36px;
+        height: 64px;
+        background: #3168ec;
+        border-radius: 0px 4px 4px 0px;
+        position: absolute;
+        top: 176px;
+        left: 0px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        cursor: pointer;
+        z-index: 999;
+        span {
+            font-size: 14px;
+            font-family: PingFangSC-Regular, PingFang SC;
+            font-weight: 400;
+            color: #ffffff;
+            line-height: 20px;
+        }
+    }
+    .threebox1 {
+        width: 36px;
+        height: 64px;
+        background: #3195ec;
+        border-radius: 0px 4px 4px 0px;
+        position: absolute;
+        top: 240px;
+        left: 0px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        cursor: pointer;
+        z-index: 999;
+        span {
+            font-size: 14px;
+            font-family: PingFangSC-Regular, PingFang SC;
+            font-weight: 400;
+            color: #ffffff;
+            line-height: 20px;
+        }
+    }
+    .mainContent {
+        width: calc(100% - 24px);
+        padding: 12px;
+        background: #f3f3f3;
+        border-left: 1px solid #adb3bb;
+        position: relative;
+        ::v-deep.el-dialog__body {
+            padding: 10px 30px !important;
+        }
+        ::v-deep.el-textarea {
+            padding: 0 16px 16px 16px;
+            width: calc(100% - 24px);
+        }
+        .buttton_right {
+            // width: 1332px;
+            width: 97%;
+            position: absolute;
+            top: 38px;
+            left: 34px;
+            z-index: 999;
+            .top_title {
+                display: inline-block;
+                width: 180px;
+                height: 16px;
+                text-align: center;
+                font-size: 16px;
+                font-family: PingFangSC-Medium, PingFang SC;
+                font-weight: 600;
+                color: #000458;
+                line-height: 16px;
+                border-left: 2px #025df4 solid;
+            }
+            .btn {
+                position: absolute;
+                top: -5px;
+                right: 24px;
+                background: #21a97a;
+                border: 1px solid #21a97a;
+                font-size: 14px;
+                width: 80px;
+                height: 32px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 4px;
+                color: #fff;
+            }
+            .btn2 {
+                position: absolute;
+                top: -5px;
+                right: 124px;
+                background: #ff6b3b;
+                border: 1px solid #ff6b3b;
+                font-size: 14px;
+                width: 96px;
+                height: 32px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 4px;
+                color: #fff;
+            }
+            /deep/ .echartsList {
+                display: flex;
+                width: 360px;
+                position: absolute;
+                top: -5px;
+                right: 220px;
+                // border: 1px red solid;
+                .el-radio {
+                    margin-right: 0;
+                }
+                .el-radio__input.is-checked .el-radio__inner {
+                    border: none;
+                    background-color: transparent;
+                }
+                .el-radio--medium.is-bordered {
+                    width: 80px;
+                    height: 32px;
+                }
+                .el-radio__inner {
+                    border: none;
+                    display: none;
+                }
+                .el-radio--medium.is-bordered {
+                    padding-left: 6px;
+                    padding-top: 8px;
+                }
+                .el-radio__label {
+                    padding: 0;
+                }
+                .el-radio.is-bordered.is-checked {
+                    width: 80px;
+                    background: #3168ec;
+                    font-size: 14px;
+                    span {
+                        color: #fff;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**按钮 */
+.controlBtn {
+    ul li {
+        text-align: center;
+        padding: 8px 0;
+        cursor: pointer;
+        .icon {
+            width: 32px;
+            height: 32px;
+            color: #546070;
+        }
+        &:hover,
+        &.active {
+            background: #dcecff;
+            .icon {
+                color: #3e87f4;
+            }
+        }
+    }
+}
+.colorType {
+    li {
+        height: 30px;
+        .legend {
+            opacity: 1;
+            height: 30px;
+            display: inline-block;
+            width: 30px;
+            border: 1px solid #000;
+        }
+    }
+}
+.el-radio {
+    display: flex;
+    ::v-deep.el-radio__input {
+        line-height: 30px !important;
+    }
+}
+</style>>

@@ -1,0 +1,491 @@
+<template>
+    <div class="tableDiv">
+        <div class="tableTop">
+            <el-table
+                :data="tableData"
+                style="width: 100%"
+                :header-cell-style="getRowClass"
+                stripe
+                height="800"
+                show-summary
+                :summary-method="getSummaries"
+            >
+
+                <el-table-column
+                    v-for="item,index in keyList"
+                    :key="index"
+                    :prop="item"
+                    :label="getZW(item)"
+                    align="center"
+                >
+                </el-table-column>
+                <!-- <div
+                    slot="append"
+                    style="display:flex;border-bottom: 1px solid #EBEEF5;"
+                >
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:330px;padding:12px 40px"
+                        >
+                            平均数
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:80px;line-height:43px"
+                        >
+                            {{this.jisuan('TEM_Avg').toFixed(1)}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:160px;line-height:43px;padding-left:35px"
+                        >
+                            {{this.jisuan('TEM_Max').toFixed(1)}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:190px;line-height:43px;text-align: center;"
+                        >
+                            {{this.jisuan('TEM_Min').toFixed(1)}}
+                        </div>
+                    </div>
+                </div>
+                <div
+                    slot="append"
+                    style="display:flex;border-bottom: 1px solid #EBEEF5;"
+                >
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:250px;padding:12px 40px"
+                        >
+                            最大值
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:160px;line-height:43px"
+                        >
+                            {{this.max('TEM_Avg')}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:165px;line-height:43px"
+                        >
+                            {{this.max('TEM_Max')}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:260px;line-height:43px;text-align: center;"
+                        >
+                            {{this.max('TEM_Min')}}
+                        </div>
+                    </div>
+                </div>
+                <div
+                    slot="append"
+                    style="display:flex;border-bottom: 1px solid #EBEEF5;"
+                >
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:250px;padding:12px 40px"
+                        >
+                            最小值
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:160px;line-height:43px"
+                        >
+                            {{this.min('TEM_Avg')}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:160px;line-height:43px"
+                        >
+                            {{this.min('TEM_Max')}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:260px;line-height:43px;text-align: center;"
+                        >
+                            {{this.min('TEM_Min')}}
+                        </div>
+                    </div>
+                </div> -->
+            </el-table>
+            <!-- <el-table
+                v-else-if="tableData!='' && type != '1'"
+                :data="tableData"
+                style="width: 100%"
+                :header-cell-style="getRowClass"
+                stripe
+                height="800"
+            >
+                <el-table-column
+                    prop="Station_Id_C"
+                    label="站点"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="Station_Name"
+                    label="站名"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="Datetime"
+                    label="日期"
+                    align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                    :label="elementName"
+                    align="center"
+                >
+                    <template slot-scope="scope">
+                        <span>{{scope.row.GST_Avg}}</span>
+                    </template>
+                </el-table-column>
+                <div
+                    slot="append"
+                    style="display:flex;border-bottom: 1px solid #EBEEF5;justify-content: space-between;"
+                >
+                    <div
+                        class="sum_footer"
+                        style="padding-left:85px"
+                    >
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:330px;padding:12px 40px"
+                        >
+                            平均数
+                        </div>
+                    </div>
+                    <div
+                        class="sum_footer"
+                        style="padding-right:80px"
+                    >
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:80px;line-height:43px"
+                        >
+                            {{this.jisuan('TEM_Avg').toFixed(1)}}
+                        </div>
+                    </div>
+                </div>
+                <div
+                    slot="append"
+                    style="display:flex;border-bottom: 1px solid #EBEEF5;"
+                >
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:250px;padding:12px 40px"
+                        >
+                            最大值
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:160px;line-height:43px"
+                        >
+                            {{this.max('TEM_Avg')}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:165px;line-height:43px"
+                        >
+                            {{this.max('TEM_Max')}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:260px;line-height:43px;text-align: center;"
+                        >
+                            {{this.max('TEM_Min')}}
+                        </div>
+                    </div>
+                </div>
+                <div
+                    slot="append"
+                    style="display:flex;border-bottom: 1px solid #EBEEF5;"
+                >
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:250px;padding:12px 40px"
+                        >
+                            最小值
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:160px;line-height:43px"
+                        >
+                            {{this.min('TEM_Avg')}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:160px;line-height:43px"
+                        >
+                            {{this.min('TEM_Max')}}
+                        </div>
+                    </div>
+                    <div class="sum_footer">
+                        <div
+                            class="sum_footer_unit center"
+                            style="width:260px;line-height:43px;text-align: center;"
+                        >
+                            {{this.min('TEM_Min')}}
+                        </div>
+                    </div>
+                </div>
+            </el-table> -->
+        </div>
+        <div class="tableBottom">
+            <el-input
+                type="textarea"
+                :rows="5"
+                placeholder="请开始查询"
+                v-model="textarea"
+            >
+            </el-input>
+        </div>
+    </div>
+</template>
+<script>
+export default {
+    data() {
+        return {
+            textarea: "",
+        };
+    },
+    props: {
+        tableData: {
+            type: Array,
+        },
+        type: {
+            type: Number,
+        },
+        elementName: {
+            type: String,
+        },
+        keyList: {
+            type: Array,
+        },
+    },
+
+    methods: {
+        getRowClass({ rowIndex }) {
+            if (rowIndex == 0) {
+                return "background:#f8f8f9;";
+            }
+        },
+        jisuan(TEM_Avg) {
+            var sum = 0;
+            for (var i = 0; i < this.tableData.length; i++) {
+                sum += this.tableData[i][TEM_Avg];
+            }
+            return sum / this.tableData.length;
+        },
+        /*   max(TEM_Max) {
+            var max = this.tableData[0][TEM_Max];
+            var time = "";
+            var Name = "";
+            for (var i = 1; i < this.tableData.length; i++) {
+                if (this.tableData[i][TEM_Max] > max) {
+                    max = this.tableData[i][TEM_Max];
+                    time = this.tableData[i].Datetime;
+                    Name = this.tableData[i].Station_Name;
+                }
+            }
+            return time + "/" + Name + " /" + max;
+        },
+        min(TEM_Min) {
+            var min = this.tableData[0][TEM_Min];
+            var time = "";
+            var Name = "";
+            for (var i = 1; i < this.tableData.length; i++) {
+                if (this.tableData[i].TEM_Min < min) {
+                    min = this.tableData[i][TEM_Min];
+                    time = this.tableData[i].Datetime;
+                    Name = this.tableData[i].Station_Name;
+                }
+            }
+            return time + "/" + Name + " /" + min;
+        }, */
+        getZW(item) {
+            switch (item) {
+                case "City":
+                    return "城市";
+                case "Country":
+                    return "国家";
+                case "Station_Name":
+                    return "站名";
+                case "Lat":
+                    return "纬度";
+                case "Lon":
+                    return "经度";
+                case "Station_Id_C":
+                    return "站点编号";
+                case "RHU_Avg":
+                    return "平均相对湿度";
+                case "RHU_Min":
+                    return "最小相对湿度";
+                case "PRE_Time_2020":
+                    return "20-20时降水量";
+                case "PRE_Time_0808":
+                    return "08-08时降水量";
+                case "WIN_S_2mi_Avg":
+                    return "平均2分钟风速";
+                case "WIN_S_Max":
+                    return "最大风速";
+                case "WIN_S_Inst_Max":
+                    return "极大风速";
+                case "GST_Avg_5cm":
+                    return "平均5cm地温";
+                case "GST_Avg_10cm":
+                    return "平均10cm地温";
+                case "GST_Avg_15cm":
+                    return "平均15cm地温";
+                case "GST_Avg_20cm":
+                    return "平均20cm地温";
+                case "GST_Avg_40cm":
+                    return "平均40cm地温";
+                case "GST_Avg_80cm":
+                    return "平均80cm地温";
+                case "GST_Avg_160cm":
+                    return "平均160cm地温";
+                case "GST_Avg_320cm":
+                    return "平均320cm地温";
+                case "RHU":
+                    return "相对湿度";
+                case "PRE_1h":
+                    return "过去1小时降水量";
+                case "GST":
+                    return "地面温度";
+                case "GST_Max":
+                    return "最高地面温度";
+                case "GST_Min":
+                    return "最低地面温度";
+                case "GST_Min_12h":
+                    return "过去12小时地面最低温度";
+                case "GST_5cm":
+                    return "5cm地温";
+                case "GST_10cm":
+                    return "10cm地温";
+                case "GST_15cm":
+                    return "15cm地温";
+                case "GST_20cm":
+                    return "20cm地温";
+                case "GST_40cm":
+                    return "40cm地温";
+                case "GST_80cm":
+                    return "80cm地温";
+                case "GST_160cm":
+                    return "160cm地温";
+                case "GST_320cm":
+                    return "320cm地温";
+                default:
+                    break;
+            }
+        },
+        getSummaries(param) {
+            const { columns, data } = param;
+            const sums = [];
+            columns.forEach((column, index) => {
+                if (index === 0) {
+                    sums[index] = "平均值";
+                    return;
+                } else if (index === 1) {
+                    sums[index] = "-";
+                    return;
+                } else if (index === 2) {
+                    sums[index] = "-";
+                    return;
+                } else if (index === 3) {
+                    sums[index] = "-";
+                    return;
+                } else if (index === 4) {
+                    sums[index] = "-";
+                    return;
+                } else if (index === 5) {
+                    sums[index] = "-";
+                    return;
+                }
+                let propertydata = [];
+                let stationname = [];
+                let latlon = [];
+                const values = data.map((item) =>
+                    Number(item[column.property])
+                );
+                data.map((item) => {
+                    stationname.push(item.Station_Name);
+                    latlon.push(item.Lat + '-' + item.Lon + '-' + Number(item[column.property]));
+                    let lastarr = Object.keys(item).pop()
+                    if (column.property == lastarr.toString()) {
+                        propertydata.push(item[column.property]);
+
+                    }
+                });
+                this.$emit('eventBusClick', propertydata,stationname,latlon.toString() )
+                let totalCount = 0;
+                if (!values.every((value) => isNaN(value))) {
+                    sums[index] = values.reduce((prev, curr) => {
+                        const value = Number(curr);
+                        if (!isNaN(value)) {
+                            totalCount++;
+                            return prev + curr;
+                        } else {
+                            return prev;
+                        }
+                    }, 0);
+                    if (totalCount) {
+                        sums[index] = sums[index] / totalCount;
+                        sums[index] = sums[index].toFixed(2);
+                    }
+                } else {
+                    sums[index] = "-";
+                }
+            });
+            return sums;
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+.tableDiv {
+    .tableTop {
+        padding: 16px 16px 0 16px;
+        .el-table--scrollable-x .el-table__body-wrapper {
+            overflow-x: auto;
+        }
+    }
+}
+</style>

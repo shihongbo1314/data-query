@@ -1,0 +1,89 @@
+<template>
+    <div id="echart" ref="echart"></div>
+</template>
+<script>
+import * as echarts from "echarts";
+export default {
+    data() {
+        return {
+             myCharts:null,
+        };
+    },
+    props: {
+        visiable: {
+            type: Boolean,
+            default: false,
+        },
+         TEM_AvgData: {
+            type: Array,
+        },
+        Station_NameData: {
+            type: Array,
+        },
+         startDateStr:{
+            type: String,
+        },
+        endDateStr:{
+            type: String,
+        }
+    },
+    watch: {
+        visiable() {
+            this.$refs.echart.style.width = "100%";
+            this.myCharts.resize();
+        },
+    },
+    mounted() {
+        this.lineClick();
+    },
+    methods: {
+        lineClick() {
+            const option = {
+                grid: {
+                    show: true,
+                    top: "15%",
+                },
+                 title: {
+                    text: this.startDateStr +'-'+ this.endDateStr +"平均气温分布图",
+                    left: "center",
+                   
+                },
+               xAxis: {
+                    type: "category",
+                    axisLine: {
+                        show: true,
+                    },
+                    data: this.Station_NameData,
+                },
+                yAxis: {
+                    type: "value",
+                    axisLine: {
+                        show: true,
+                    },
+                },
+                tooltip: {
+                    trigger: "axis",
+                    axisPointer: {
+                        type: "shadow",
+                    },
+                },
+                series: [
+                    {
+                        data: this.TEM_AvgData,
+                        type: "line",
+                    },
+                ],
+            };
+            this.myCharts = echarts.init(document.getElementById("echart"));
+            this.myCharts.setOption(option);
+        },
+    },
+};
+</script>
+<style lang="scss" scoped>
+#echart {
+    margin: 50px 20px;
+    height: 90vh;
+    width: 60vw;
+}
+</style>
